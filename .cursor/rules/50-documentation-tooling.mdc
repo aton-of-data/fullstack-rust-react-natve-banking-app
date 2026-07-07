@@ -1,0 +1,37 @@
+---
+description: ESLint, Prettier, JSDoc, and Conventional Commits enforcement
+alwaysApply: true
+---
+
+# Frontend Tooling & Documentation
+
+Policies: `.ai/policies/frontend-tooling.md`, `.ai/policies/documentation.md`
+
+## Enforced Commands
+
+```bash
+npm run lint           # ESLint + eslint-plugin-jsdoc + architectural rules
+npm run format:check   # Prettier
+npx commitlint         # Conventional Commits (commit-msg hook)
+```
+
+Templates: `.ai/templates/frontend-tooling/`. Root config: `commitlint.config.cjs`.
+
+## JSDoc (Documenter Agent)
+
+Required on all exported functions, classes, types, interfaces, RTK endpoints, public hooks.
+
+## Mermaid (Documenter Agent)
+
+Required in `03-documentation.md` and feature READMEs for non-trivial flows (sequence, state, flowchart).
+
+## Prohibited
+
+- Exported symbols without JSDoc
+- Non-conventional commit messages
+- `git commit --no-verify`
+- `eslint-disable` / `prettier-ignore` without ADR
+
+## Pipeline
+
+Documentation stage (`03-documentation.md`) must PASS before QA.

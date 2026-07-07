@@ -1,0 +1,31 @@
+---
+description: Non-skippable delivery pipeline stages and artifacts
+alwaysApply: true
+---
+
+# Delivery Pipeline
+
+```
+Architecture → Implementation → Documentation → QA → Code Review → Commit
+```
+
+## Artifacts (required per work item)
+
+| Stage | File | Gate |
+|-------|------|------|
+| Architecture | `01-architecture.md` | Implementation approval |
+| Implementation | `02-implementation.md` | Documenter entry |
+| Documentation | `03-documentation.md` | PASS / FAIL / BLOCKED |
+| QA | `04-qa-report.md` | PASS / FAIL / BLOCKED |
+| Review | `05-code-review.md` | APPROVED / CHANGES_REQUESTED / BLOCKED |
+| Commit | `06-commit-report.md` | hash + commitlint evidence |
+
+Templates: `.ai/templates/`. Policy: `.ai/policies/delivery-pipeline.md`.
+
+## Rules
+
+- No stage skipping or self-approval.
+- Documenter adds JSDoc + Mermaid before QA.
+- QA must run `npm run lint` and `npm run format:check` (when frontend exists).
+- Committer must pass commitlint (Conventional Commits).
+- FAIL/CHANGES_REQUESTED → Implementation or Documenter; BLOCKED → Architecture.

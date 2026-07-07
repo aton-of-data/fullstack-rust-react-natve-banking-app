@@ -1,0 +1,48 @@
+---
+description: Rust backend — layered workspace, money invariants, quality gates
+globs: "backend/**/*.{rs,toml}"
+alwaysApply: false
+---
+
+# Rust Backend Architecture
+
+Policy: `.ai/policies/backend-rust.md`
+
+## Crates
+
+```
+domain ← application ← adapters-http | adapters-persistence ← infrastructure
+```
+
+- `domain`: business rules, money types, invariants — no HTTP/ORM/framework deps
+- `application`: use cases, ports, orchestration
+- `contracts`: API DTOs / OpenAPI types
+- `adapters-http`: thin Axum handlers
+- `adapters-persistence`: ORM, repos, migrations
+- `infrastructure`: config, telemetry, clients
+
+## Money (Product Critical)
+
+- Integer minor units
+- DB transactions for transfers
+- Idempotency keys on transfer API
+- Append-only ledger for audit
+- Tests: 100 concurrent transfers + duplicate idempotency key
+
+## Handlers
+
+Validate → map to command → execute use case → map response. No business logic in handlers.
+
+## Quality Gates
+
+```bash
+cargo fmt --check
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test
+```
+
+Optional when configured: `cargo nextest run`, `cargo deny check`, `cargo audit`.
+
+## Prohibited
+
+ORM entities in domain; skipped migrations; undocumented `allow(clippy::...)` bypasses.

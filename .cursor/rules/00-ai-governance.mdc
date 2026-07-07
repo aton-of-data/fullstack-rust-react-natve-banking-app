@@ -1,0 +1,28 @@
+---
+description: AI engineering governance — canonical invariants and pipeline entry
+alwaysApply: true
+---
+
+# AI Governance
+
+Canonical source: `context.md`. Do not weaken these rules.
+
+## Invariants
+
+1. Every code change requires `docs/ai/work-items/<feature-id>/`.
+2. Pipeline: Architecture → Implementation → Documentation → QA → Code Review → Commit.
+3. Failing QA/Review → Implementation; doc gaps → Documenter; BLOCKED → Architecture.
+4. Pure reducers only; no side effects in reducers.
+5. Features need acceptance criteria, tests, JSDoc, evidence, independent review.
+6. Only Committer Agent creates commits (after all gates + commitlint + authorization).
+7. Never bypass pipeline for small changes.
+8. New dependencies/patterns need documented rationale (ADR when material).
+9. Never claim success without executed verification.
+
+## Agents
+
+Read `.ai/agents/<role>.md` for the active stage. Manifest: `.ai/manifest.yml`.
+
+## Entry
+
+New work → Architecture Agent → `01-architecture.md` before any production code.

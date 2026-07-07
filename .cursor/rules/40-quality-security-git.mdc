@@ -1,0 +1,41 @@
+---
+description: Quality, security, and git commit rules
+alwaysApply: true
+---
+
+# Quality, Security, and Git
+
+Policies: `.ai/policies/quality-and-security.md`, `.ai/policies/git-and-commits.md`
+
+## Verification
+
+Run and record: typecheck, format, lint, tests. Include command + exit code in QA artifacts.
+
+Never mark PASS/APPROVED without evidence. No `TODO: test later` or temporary lint disables without ADR.
+
+## Security Triggers
+
+Review required for: auth, passwords, tokens, transfers, validation, logging, new dependencies.
+
+Skill: `.ai/skills/security-review.md`
+
+## Prohibited Bypasses
+
+- Temporary `useState` / direct `fetch` / Context for app state
+- Temporary ORM in domain
+- Pipeline skip for "small" changes
+- Claiming tests pass without running them
+
+## Git
+
+- **Only Committer Agent** runs `git commit`
+- Commit requires QA PASS + Review APPROVED + commitlint-valid Conventional Commits
+- Conventional Commits default
+- No amend, force-push, `--no-verify` unless explicitly authorized
+- No secrets in commits
+
+## ADRs
+
+Required for state management, API contracts, schema, auth, crate boundaries, new deps, rule exceptions.
+
+Path: `docs/ai/adr/`

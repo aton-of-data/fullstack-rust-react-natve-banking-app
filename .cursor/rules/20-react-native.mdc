@@ -1,0 +1,50 @@
+---
+description: React Native — Redux Toolkit, RTK Query, Atomic Design
+globs: "{frontend,src,mobile,app}/**/*.{ts,tsx,js,jsx}"
+alwaysApply: false
+---
+
+# React Native Architecture
+
+Policy: `.ai/policies/frontend-react-native.md`
+
+## State
+
+- Redux Toolkit only for application state
+- No `useState`, `useReducer`, custom `Context` for app/page/form/workflow/loading/error/selection
+- `useAppDispatch`, `useAppSelector`, memoized selectors
+- Pure reducers — no I/O, timers, navigation, or network in reducers
+
+## API
+
+- RTK Query only — single `baseApi`, typed endpoints, tags, invalidation
+- No `fetch`, Axios, or direct HTTP from UI/hooks/screens/slices
+
+## UI Structure
+
+```
+src/app/ | shared/ui/{atoms,molecules,organisms,templates}/ | entities/ | features/ | widgets/ | pages/
+```
+
+Business logic in features/entities — not in atoms/molecules/templates.
+
+## Side Effects
+
+RTK Query lifecycle, listener middleware, or named async workflows with cleanup.
+
+## Lint Targets (when configured)
+
+Error on: `useState`, `useReducer`, `createContext`, `useContext`, `fetch`, `axios` — ADR exceptions only.
+
+## Tooling (Enforced)
+
+```bash
+npm run lint           # ESLint + eslint-plugin-jsdoc
+npm run format:check   # Prettier
+```
+
+JSDoc required on all exports (Documenter Agent). Policy: `.ai/policies/frontend-tooling.md`.
+
+## Real-Time Feed
+
+Product requires live transaction updates without manual refresh — WebSocket/SSE + RTK integration (ADR required).
