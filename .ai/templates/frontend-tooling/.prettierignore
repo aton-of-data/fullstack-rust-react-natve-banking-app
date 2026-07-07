@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+coverage/
+.android/
+.ios/
+*.lock
+package-lock.json
