@@ -23,10 +23,15 @@ pub struct AppState {
     pub login_rate_limit_per_min: u32,
     pub transfer_rate_limit_per_min: u32,
     pub default_page_size: u64,
+    pub cors_origins: Vec<String>,
+    pub environment: String,
+    pub metrics_auth_token: Option<String>,
+    pub trust_proxy_headers: bool,
 }
 
 impl AppState {
     /// Creates application state with the given services and rate-limit settings.
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         auth: Arc<AuthService>,
         users: Arc<UserService>,
@@ -35,6 +40,10 @@ impl AppState {
         tokens: Arc<dyn TokenService>,
         login_rate_limit_per_min: u32,
         transfer_rate_limit_per_min: u32,
+        cors_origins: Vec<String>,
+        environment: String,
+        metrics_auth_token: Option<String>,
+        trust_proxy_headers: bool,
     ) -> Self {
         Self {
             auth,
@@ -46,6 +55,10 @@ impl AppState {
             login_rate_limit_per_min,
             transfer_rate_limit_per_min,
             default_page_size: 20,
+            cors_origins,
+            environment,
+            metrics_auth_token,
+            trust_proxy_headers,
         }
     }
 

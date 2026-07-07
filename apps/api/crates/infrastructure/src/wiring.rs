@@ -63,6 +63,10 @@ pub async fn build_app(config: &AppConfig) -> Result<Router, String> {
         tokens,
         config.login_rate_limit_per_min,
         config.transfer_rate_limit_per_min,
+        config.cors_origins.clone(),
+        config.environment.clone(),
+        config.metrics_auth_token.clone(),
+        config.trust_proxy_headers,
     )
     .with_readiness(Arc::new(DbReadiness::new(db)));
 

@@ -15,6 +15,8 @@ pub struct AppConfig {
     pub transfer_rate_limit_per_min: u32,
     pub otel_endpoint: Option<String>,
     pub otel_service_name: String,
+    pub metrics_auth_token: Option<String>,
+    pub trust_proxy_headers: bool,
 }
 
 impl AppConfig {
@@ -56,6 +58,13 @@ impl AppConfig {
         let otel_endpoint = env::var("OTEL_EXPORTER_OTLP_ENDPOINT").ok();
         let otel_service_name =
             env::var("OTEL_SERVICE_NAME").unwrap_or_else(|_| "ficus-api".into());
+        let metrics_auth_token = env::var("METRICS_AUTH_TOKEN")
+            .ok()
+            .map(|value| value.trim().to_string())
+            .filter(|value| !value.is_empty());
+        let trust_proxy_headers = env::var("TRUST_PROXY_HEADERS")
+            .map(|value| matches!(value.to_lowercase().as_str(), "1" | "true" | "yes"))
+            .unwrap_or(false);
 
         Ok(Self {
             host,
@@ -70,6 +79,8 @@ impl AppConfig {
             transfer_rate_limit_per_min,
             otel_endpoint,
             otel_service_name,
+            metrics_auth_token,
+            trust_proxy_headers,
         })
     }
 

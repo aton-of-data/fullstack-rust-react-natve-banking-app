@@ -41,31 +41,40 @@ impl RateLimiter {
     }
 }
 
-fn client_ip(request: &Request) -> String {
+fn client_ip(request: &Request, trust_proxy_headers: bool) -> String {
+    if trust_proxy_headers {
+        if let Some(ip) = request
+            .headers()
+            .get("x-forwarded-for")
+            .and_then(|v| v.to_str().ok())
+            .and_then(|s| s.split(',').next())
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .or_else(|| {
+                request
+                    .headers()
+                    .get("x-real-ip")
+                    .and_then(|v| v.to_str().ok())
+            })
+        {
+            return ip.to_string();
+        }
+    }
+
     request
-        .headers()
-        .get("x-forwarded-for")
-        .and_then(|v| v.to_str().ok())
-        .and_then(|s| s.split(',').next())
-        .map(str::trim)
-        .filter(|s| !s.is_empty())
-        .or_else(|| {
-            request
-                .headers()
-                .get("x-real-ip")
-                .and_then(|v| v.to_str().ok())
-        })
-        .unwrap_or("unknown")
-        .to_string()
+        .extensions()
+        .get::<axum::extract::ConnectInfo<std::net::SocketAddr>>()
+        .map(|info| info.0.ip().to_string())
+        .unwrap_or_else(|| "unknown".to_string())
 }
 
 /// Rate-limits login attempts by client IP.
 pub async fn login_rate_limit(
-    axum::extract::State(limiter): axum::extract::State<RateLimiter>,
+    axum::extract::State((limiter, trust_proxy_headers)): axum::extract::State<(RateLimiter, bool)>,
     request: Request,
     next: Next,
 ) -> Result<Response, ApiError> {
-    let key = format!("login:{}", client_ip(&request));
+    let key = format!("login:{}", client_ip(&request, trust_proxy_headers));
     limiter.check(&key)?;
     Ok(next.run(request).await)
 }
@@ -80,7 +89,7 @@ pub async fn transfer_rate_limit(
         .extensions()
         .get::<super::auth::AuthenticatedUser>()
         .map(|u| u.user_id.to_string())
-        .unwrap_or_else(|| client_ip(&request));
+        .unwrap_or_else(|| client_ip(&request, false));
 
     let key = format!("transfer:{user_id}");
     limiter.check(&key)?;
