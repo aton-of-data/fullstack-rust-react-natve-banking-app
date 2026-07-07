@@ -76,6 +76,8 @@ pub struct TestAppBuilder {
     db: Option<DatabaseConnection>,
     users: Option<TestUsers>,
     start_server: bool,
+    login_rate_limit_per_min: Option<u32>,
+    transfer_rate_limit_per_min: Option<u32>,
 }
 
 impl TestAppBuilder {
@@ -86,6 +88,8 @@ impl TestAppBuilder {
             db: None,
             users: None,
             start_server: false,
+            login_rate_limit_per_min: None,
+            transfer_rate_limit_per_min: None,
         }
     }
 
@@ -104,6 +108,18 @@ impl TestAppBuilder {
     /// Starts the HTTP API on an ephemeral local port.
     pub fn with_http_server(mut self) -> Self {
         self.start_server = true;
+        self
+    }
+
+    /// Overrides login rate limit for deterministic HTTP 429 tests.
+    pub fn with_login_rate_limit(mut self, per_min: u32) -> Self {
+        self.login_rate_limit_per_min = Some(per_min);
+        self
+    }
+
+    /// Overrides transfer rate limit for deterministic HTTP 429 tests.
+    pub fn with_transfer_rate_limit(mut self, per_min: u32) -> Self {
+        self.transfer_rate_limit_per_min = Some(per_min);
         self
     }
 
@@ -128,7 +144,11 @@ impl TestAppBuilder {
         let wired = wire_services(db.clone(), users.clone()).await?;
 
         let (base_url, server_handle) = if self.start_server {
-            let config = test_app_config(&self.database_url);
+            let config = test_app_config(
+                &self.database_url,
+                self.login_rate_limit_per_min,
+                self.transfer_rate_limit_per_min,
+            );
             let (url, handle) = spawn_http_server(&config).await?;
             (Some(url), Some(handle))
         } else {
@@ -196,7 +216,11 @@ fn test_jwt_secret() -> String {
     "integration-test-jwt-secret-32chars-min".to_string()
 }
 
-fn test_app_config(database_url: &str) -> AppConfig {
+fn test_app_config(
+    database_url: &str,
+    login_rate_limit_per_min: Option<u32>,
+    transfer_rate_limit_per_min: Option<u32>,
+) -> AppConfig {
     AppConfig {
         host: "127.0.0.1".into(),
         port: 0,
@@ -206,8 +230,8 @@ fn test_app_config(database_url: &str) -> AppConfig {
         jwt_expiry_secs: 3600,
         environment: "test".into(),
         cors_origins: vec!["http://localhost".into()],
-        login_rate_limit_per_min: 10_000,
-        transfer_rate_limit_per_min: 10_000,
+        login_rate_limit_per_min: login_rate_limit_per_min.unwrap_or(10_000),
+        transfer_rate_limit_per_min: transfer_rate_limit_per_min.unwrap_or(10_000),
         otel_endpoint: None,
         otel_service_name: "ficus-api-test".into(),
     }

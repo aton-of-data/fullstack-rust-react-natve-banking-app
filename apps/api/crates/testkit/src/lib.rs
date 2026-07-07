@@ -2,12 +2,19 @@
 
 mod app;
 mod assertions;
+mod http;
 mod seed;
 
 pub use app::{wire_services, TestApp, TestAppBuilder, TestUser, WiredServices};
 pub use assertions::{
-    count_completed_transfers, ledger_derived_balance, negative_balances, orphan_ledger_entries,
-    signed_ledger_amount, total_balance_minor,
+    count_all_transfers, count_audit_events, count_completed_transfers, count_idempotency_records,
+    count_ledger_entries, ledger_derived_balance, negative_balances, orphan_ledger_entries,
+    reconcile_all_accounts, signed_ledger_amount, total_balance_minor, ReconciliationMismatch,
+};
+pub use http::{
+    http_client, http_create_transfer, http_create_transfer_raw, http_get_balance, http_get_feed,
+    http_get_ledger, http_get_me, http_get_metrics, http_login, http_login_response, http_logout,
+    HttpJsonResponse, HttpTransferParams,
 };
 pub use seed::{seed_test_users, set_account_balance, TestUsers, SYSTEM_ACCOUNT_ID};
 
