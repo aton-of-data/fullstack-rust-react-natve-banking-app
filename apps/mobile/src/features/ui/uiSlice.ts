@@ -1,4 +1,4 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 /**
  * Login form field state.
@@ -24,8 +24,8 @@ export interface UiState {
 
 const initialState: UiState = {
   loginForm: {
-    username: "",
-    password: "",
+    username: '',
+    password: '',
   },
   globalError: null,
   showGlobalError: false,
@@ -35,7 +35,7 @@ const initialState: UiState = {
  * Redux slice for UI-only ephemeral state (form fields, banners).
  */
 export const uiSlice = createSlice({
-  name: "ui",
+  name: 'ui',
   initialState,
   reducers: {
     /**
@@ -64,7 +64,7 @@ export const uiSlice = createSlice({
      * @param state - Current UI state.
      */
     clearLoginForm(state) {
-      state.loginForm = { username: "", password: "" };
+      state.loginForm = { username: '', password: '' };
     },
 
     /**
@@ -91,13 +91,8 @@ export const uiSlice = createSlice({
 });
 
 /** UI slice action creators. */
-export const {
-  setLoginUsername,
-  setLoginPassword,
-  clearLoginForm,
-  showError,
-  dismissError,
-} = uiSlice.actions;
+export const { setLoginUsername, setLoginPassword, clearLoginForm, showError, dismissError } =
+  uiSlice.actions;
 
 /** UI slice reducer. */
 export const uiReducer = uiSlice.reducer;

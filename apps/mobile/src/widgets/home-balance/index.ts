@@ -1,1 +1,1 @@
-export { HomeBalanceWidget } from "./HomeBalanceWidget";
+export { HomeBalanceWidget } from './HomeBalanceWidget';

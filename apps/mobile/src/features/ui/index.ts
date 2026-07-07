@@ -6,10 +6,6 @@ export {
   clearLoginForm,
   showError,
   dismissError,
-} from "./uiSlice";
-export type { UiState, LoginFormFields } from "./uiSlice";
-export {
-  selectLoginForm,
-  selectGlobalError,
-  selectShowGlobalError,
-} from "./selectors";
+} from './uiSlice';
+export type { UiState, LoginFormFields } from './uiSlice';
+export { selectLoginForm, selectGlobalError, selectShowGlobalError } from './selectors';

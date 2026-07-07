@@ -1,9 +1,9 @@
-import type { FeedItem } from "@ficus/contracts";
-import { StyleSheet, View } from "react-native";
+import type { FeedItem } from '@ficus/contracts';
+import { StyleSheet, View } from 'react-native';
 
-import { spacing } from "@/shared/theme";
-import { formatMoney } from "@/shared/lib/money";
-import { AppText, Card } from "@/shared/ui/atoms";
+import { spacing } from '@/shared/theme';
+import { formatMoney } from '@/shared/lib/money';
+import { AppText, Card } from '@/shared/ui/atoms';
 
 /**
  * Props for the {@link FeedItemCard} molecule.
@@ -26,10 +26,8 @@ export interface FeedItemCardProps {
 export function FeedItemCard({ item, currentUsername }: FeedItemCardProps) {
   const amount = formatMoney(item.amount_minor, item.currency);
   const isSender = currentUsername === item.sender_username;
-  const direction = isSender ? "sent" : "received";
-  const counterparty = isSender
-    ? item.recipient_username
-    : item.sender_username;
+  const direction = isSender ? 'sent' : 'received';
+  const counterparty = isSender ? item.recipient_username : item.sender_username;
 
   return (
     <Card elevated={false} style={styles.card}>
@@ -40,7 +38,7 @@ export function FeedItemCard({ item, currentUsername }: FeedItemCardProps) {
         </AppText>
       </View>
       <AppText variant="body">
-        {isSender ? "To" : "From"} @{counterparty}
+        {isSender ? 'To' : 'From'} @{counterparty}
       </AppText>
       {item.description ? (
         <AppText variant="caption" muted numberOfLines={2}>
@@ -59,9 +57,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: spacing.xs,
   },
   time: {

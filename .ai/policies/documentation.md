@@ -39,9 +39,7 @@ Must pass before QA.
  * @example
  * await sendTransfer({ toUsername: 'alice', amountMinor: 1500, idempotencyKey: '...' });
  */
-export async function sendTransfer(
-  request: SendTransferRequest,
-): Promise<Transfer> {}
+export async function sendTransfer(request: SendTransferRequest): Promise<Transfer> {}
 ```
 
 ### Type annotations

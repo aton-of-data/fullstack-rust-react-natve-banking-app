@@ -1,11 +1,11 @@
-import { Text, type TextProps, type TextStyle } from "react-native";
+import { Text, type TextProps, type TextStyle } from 'react-native';
 
-import { colors, typography } from "@/shared/theme";
+import { colors, typography } from '@/shared/theme';
 
 /**
  * Text style variants.
  */
-export type TextVariant = "title" | "subtitle" | "body" | "caption" | "label";
+export type TextVariant = 'title' | 'subtitle' | 'body' | 'caption' | 'label';
 
 /**
  * Props for the {@link AppText} atom.
@@ -20,13 +20,13 @@ export interface AppTextProps extends TextProps {
 }
 
 const variantMap: Record<TextVariant, TextStyle> = {
-  title: { fontSize: typography.fontSize.xl, fontWeight: "700" },
-  subtitle: { fontSize: typography.fontSize.lg, fontWeight: "600" },
-  body: { fontSize: typography.fontSize.md, fontWeight: "400" },
-  caption: { fontSize: typography.fontSize.sm, fontWeight: "400" },
+  title: { fontSize: typography.fontSize.xl, fontWeight: '700' },
+  subtitle: { fontSize: typography.fontSize.lg, fontWeight: '600' },
+  body: { fontSize: typography.fontSize.md, fontWeight: '400' },
+  caption: { fontSize: typography.fontSize.sm, fontWeight: '400' },
   label: {
     fontSize: typography.fontSize.sm,
-    fontWeight: "600",
+    fontWeight: '600',
     letterSpacing: 0.5,
   },
 };
@@ -43,7 +43,7 @@ const variantMap: Record<TextVariant, TextStyle> = {
  * @returns Styled text element.
  */
 export function AppText({
-  variant = "body",
+  variant = 'body',
   muted = false,
   error = false,
   style,

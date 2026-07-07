@@ -1,7 +1,7 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View } from 'react-native';
 
-import { spacing } from "@/shared/theme";
-import { AppText } from "@/shared/ui/atoms";
+import { spacing } from '@/shared/theme';
+import { AppText } from '@/shared/ui/atoms';
 
 /**
  * Props for the {@link EmptyState} molecule.
@@ -38,14 +38,14 @@ export function EmptyState({ title, description }: EmptyStateProps) {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
+    alignItems: 'center',
     padding: spacing.xl,
     gap: spacing.sm,
   },
   title: {
-    textAlign: "center",
+    textAlign: 'center',
   },
   description: {
-    textAlign: "center",
+    textAlign: 'center',
   },
 });

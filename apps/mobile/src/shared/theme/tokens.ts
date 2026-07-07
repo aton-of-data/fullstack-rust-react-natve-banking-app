@@ -3,29 +3,29 @@
  */
 export const colors = {
   /** Deep forest green — primary brand */
-  primary: "#0B3D2E",
+  primary: '#0B3D2E',
   /** Lighter green for interactive elements */
-  primaryLight: "#147A5A",
+  primaryLight: '#147A5A',
   /** Accent gold for highlights */
-  accent: "#D4A853",
+  accent: '#D4A853',
   /** App background */
-  background: "#F4F7F5",
+  background: '#F4F7F5',
   /** Elevated surface (cards) */
-  surface: "#FFFFFF",
+  surface: '#FFFFFF',
   /** Primary text */
-  text: "#1A2E28",
+  text: '#1A2E28',
   /** Secondary / muted text */
-  textMuted: "#5C7269",
+  textMuted: '#5C7269',
   /** Borders and dividers */
-  border: "#D8E4DE",
+  border: '#D8E4DE',
   /** Error states */
-  error: "#C0392B",
+  error: '#C0392B',
   /** Success states */
-  success: "#1E8449",
+  success: '#1E8449',
   /** Warning states */
-  warning: "#D68910",
+  warning: '#D68910',
   /** Overlay scrim */
-  overlay: "rgba(11, 61, 46, 0.45)",
+  overlay: 'rgba(11, 61, 46, 0.45)',
 } as const;
 
 /**
@@ -45,9 +45,9 @@ export const spacing = {
  */
 export const typography = {
   fontFamily: {
-    regular: "System",
-    medium: "System",
-    bold: "System",
+    regular: 'System',
+    medium: 'System',
+    bold: 'System',
   },
   fontSize: {
     xs: 12,
@@ -79,14 +79,14 @@ export const radii = {
  */
 export const shadows = {
   sm: {
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 4,
     elevation: 2,
   },
   md: {
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.12,
     shadowRadius: 8,

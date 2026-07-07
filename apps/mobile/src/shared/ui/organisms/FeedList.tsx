@@ -1,11 +1,11 @@
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, StyleSheet, View } from 'react-native';
 
-import { spacing } from "@/shared/theme";
-import { selectUsername } from "@/features/auth";
-import { useGetFeedQuery } from "@/services";
-import { useAppSelector } from "@/store/hooks";
-import { AppText, ErrorBanner, Spinner } from "@/shared/ui/atoms";
-import { EmptyState, FeedItemCard } from "@/shared/ui/molecules";
+import { spacing } from '@/shared/theme';
+import { selectUsername } from '@/features/auth';
+import { useGetFeedQuery } from '@/services';
+import { useAppSelector } from '@/store/hooks';
+import { AppText, ErrorBanner, Spinner } from '@/shared/ui/atoms';
+import { EmptyState, FeedItemCard } from '@/shared/ui/molecules';
 
 /**
  * Live transaction feed organism with SSE-backed RTK Query cache.
@@ -52,9 +52,7 @@ export function FeedList() {
         <FlatList
           data={items}
           keyExtractor={(item) => item.transfer_id}
-          renderItem={({ item }) => (
-            <FeedItemCard item={item} currentUsername={username} />
-          )}
+          renderItem={({ item }) => <FeedItemCard item={item} currentUsername={username} />}
           scrollEnabled={false}
           accessibilityLabel="Transaction feed"
         />

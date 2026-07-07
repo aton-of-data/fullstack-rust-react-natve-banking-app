@@ -1,4 +1,4 @@
-export { baseApi, ficusApi, apiTags } from "./baseApi";
+export { baseApi, ficusApi, apiTags } from './baseApi';
 export {
   useLoginMutation,
   useLogoutMutation,
@@ -8,5 +8,5 @@ export {
   useGetLedgerQuery,
   useCreateTransferMutation,
   useGetFeedQuery,
-} from "./baseApi";
-export { getApiBaseUrl } from "./config";
+} from './baseApi';
+export { getApiBaseUrl } from './config';

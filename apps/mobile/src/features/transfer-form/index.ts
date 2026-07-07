@@ -12,8 +12,8 @@ export {
   submitFailed,
   submitSucceeded,
   resetForm,
-} from "./transferFormSlice";
-export type { TransferFormState, TransferStep } from "./transferFormSlice";
+} from './transferFormSlice';
+export type { TransferFormState, TransferStep } from './transferFormSlice';
 export {
   selectTransferStep,
   selectSearchQuery,
@@ -22,4 +22,4 @@ export {
   selectDescription,
   selectTransferSubmitting,
   selectTransferSubmitError,
-} from "./selectors";
+} from './selectors';

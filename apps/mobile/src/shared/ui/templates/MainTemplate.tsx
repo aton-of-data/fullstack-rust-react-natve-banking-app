@@ -1,8 +1,8 @@
-import { ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, spacing } from "@/shared/theme";
-import { AppText } from "@/shared/ui/atoms";
+import { colors, spacing } from '@/shared/theme';
+import { AppText } from '@/shared/ui/atoms';
 
 /**
  * Props for the {@link MainTemplate} layout.
@@ -25,13 +25,9 @@ export interface MainTemplateProps {
  * @param props.children - Page content.
  * @returns Main layout wrapper.
  */
-export function MainTemplate({
-  title,
-  headerRight,
-  children,
-}: MainTemplateProps) {
+export function MainTemplate({ title, headerRight, children }: MainTemplateProps) {
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <AppText variant="title" style={styles.title}>
           {title}
@@ -49,9 +45,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,

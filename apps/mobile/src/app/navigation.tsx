@@ -1,12 +1,12 @@
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import { selectAuthHydrated, selectIsAuthenticated } from "@/features/auth";
-import { useAppSelector } from "@/store/hooks";
-import { HomePage, LoginPage, TransferPage } from "@/pages";
-import { colors } from "@/shared/theme";
-import { Spinner } from "@/shared/ui/atoms";
+import { selectAuthHydrated, selectIsAuthenticated } from '@/features/auth';
+import { useAppSelector } from '@/store/hooks';
+import { HomePage, LoginPage, TransferPage } from '@/pages';
+import { colors } from '@/shared/theme';
+import { Spinner } from '@/shared/ui/atoms';
 
 /**
  * Root stack param list.
@@ -42,16 +42,8 @@ function MainTabs() {
         tabBarStyle: { borderTopColor: colors.border },
       }}
     >
-      <Tab.Screen
-        name="Home"
-        component={HomePage}
-        options={{ title: "Home" }}
-      />
-      <Tab.Screen
-        name="Transfer"
-        component={TransferPage}
-        options={{ title: "Send" }}
-      />
+      <Tab.Screen name="Home" component={HomePage} options={{ title: 'Home' }} />
+      <Tab.Screen name="Transfer" component={TransferPage} options={{ title: 'Send' }} />
     </Tab.Navigator>
   );
 }

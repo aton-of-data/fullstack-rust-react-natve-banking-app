@@ -1,5 +1,5 @@
-import { createListenerMiddleware } from "@reduxjs/toolkit";
-import * as SecureStore from "expo-secure-store";
+import { createListenerMiddleware } from '@reduxjs/toolkit';
+import * as SecureStore from 'expo-secure-store';
 
 import {
   authSlice,
@@ -7,16 +7,16 @@ import {
   rehydrateEmpty,
   rehydrateStarted,
   setCredentials,
-} from "@/features/auth";
+} from '@/features/auth';
 
 /** SecureStore key for the JWT access token. */
-export const ACCESS_TOKEN_KEY = "ficus_access_token";
+export const ACCESS_TOKEN_KEY = 'ficus_access_token';
 
 /** SecureStore key for the authenticated user id. */
-export const USER_ID_KEY = "ficus_user_id";
+export const USER_ID_KEY = 'ficus_user_id';
 
 /** SecureStore key for the authenticated username. */
-export const USERNAME_KEY = "ficus_username";
+export const USERNAME_KEY = 'ficus_username';
 
 /**
  * Listener middleware for auth persistence via Expo SecureStore.
@@ -37,9 +37,7 @@ listenerMiddleware.startListening({
       ]);
 
       if (token && userId && username) {
-        listenerApi.dispatch(
-          setCredentials({ accessToken: token, userId, username }),
-        );
+        listenerApi.dispatch(setCredentials({ accessToken: token, userId, username }));
       } else {
         listenerApi.dispatch(rehydrateEmpty());
       }

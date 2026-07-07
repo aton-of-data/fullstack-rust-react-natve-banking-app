@@ -1,7 +1,7 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View } from 'react-native';
 
-import { spacing } from "@/shared/theme";
-import { AppText, Input, type InputProps } from "@/shared/ui/atoms";
+import { spacing } from '@/shared/theme';
+import { AppText, Input, type InputProps } from '@/shared/ui/atoms';
 
 /**
  * Props for the {@link FormField} molecule.

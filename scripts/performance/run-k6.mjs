@@ -10,33 +10,33 @@
  * Requires k6: https://k6.io/docs/get-started/installation/
  */
 
-import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const scriptPath = join(__dirname, "login-transfer-feed.js");
+const scriptPath = join(__dirname, 'login-transfer-feed.js');
 
 function parseArgs(argv) {
   const opts = {
-    duration: process.env.K6_DURATION ?? "1m",
-    vus: process.env.K6_VUS ?? "10",
-    baseUrl: process.env.API_BASE_URL ?? "http://localhost:8080",
+    duration: process.env.K6_DURATION ?? '1m',
+    vus: process.env.K6_VUS ?? '10',
+    baseUrl: process.env.API_BASE_URL ?? 'http://localhost:8080',
     ci: false,
   };
 
   for (let i = 2; i < argv.length; i++) {
     const arg = argv[i];
-    if (arg === "--duration" && argv[i + 1]) {
+    if (arg === '--duration' && argv[i + 1]) {
       opts.duration = argv[++i];
-    } else if (arg === "--vus" && argv[i + 1]) {
+    } else if (arg === '--vus' && argv[i + 1]) {
       opts.vus = argv[++i];
-    } else if (arg === "--base-url" && argv[i + 1]) {
+    } else if (arg === '--base-url' && argv[i + 1]) {
       opts.baseUrl = argv[++i];
-    } else if (arg === "--ci") {
+    } else if (arg === '--ci') {
       opts.ci = true;
-    } else if (arg === "--help" || arg === "-h") {
+    } else if (arg === '--help' || arg === '-h') {
       printHelp();
       process.exit(0);
     }
@@ -64,7 +64,7 @@ Environment:
 }
 
 function hasK6() {
-  const result = spawnSync("k6", ["version"], { encoding: "utf8" });
+  const result = spawnSync('k6', ['version'], { encoding: 'utf8' });
   return result.status === 0;
 }
 
@@ -78,7 +78,7 @@ function main() {
 
   if (!hasK6()) {
     const msg =
-      "k6 not installed — skipping performance test. Install: https://k6.io/docs/get-started/installation/";
+      'k6 not installed — skipping performance test. Install: https://k6.io/docs/get-started/installation/';
     if (opts.ci) {
       console.warn(`[skip] ${msg}`);
       process.exit(0);
@@ -87,23 +87,21 @@ function main() {
     process.exit(1);
   }
 
-  console.log(
-    `Running k6: ${opts.vus} VUs for ${opts.duration} against ${opts.baseUrl}`,
-  );
+  console.log(`Running k6: ${opts.vus} VUs for ${opts.duration} against ${opts.baseUrl}`);
 
   const result = spawnSync(
-    "k6",
+    'k6',
     [
-      "run",
-      "--vus",
+      'run',
+      '--vus',
       String(opts.vus),
-      "--duration",
+      '--duration',
       opts.duration,
-      "-e",
+      '-e',
       `API_BASE_URL=${opts.baseUrl}`,
       scriptPath,
     ],
-    { stdio: "inherit" },
+    { stdio: 'inherit' },
   );
 
   process.exit(result.status ?? 1);

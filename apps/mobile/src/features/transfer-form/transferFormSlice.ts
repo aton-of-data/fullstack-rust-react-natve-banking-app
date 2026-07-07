@@ -1,9 +1,9 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 /**
  * Transfer wizard step identifiers.
  */
-export type TransferStep = "search" | "form" | "confirm";
+export type TransferStep = 'search' | 'form' | 'confirm';
 
 /**
  * Transfer form slice state shape.
@@ -30,13 +30,13 @@ export interface TransferFormState {
 }
 
 const initialState: TransferFormState = {
-  step: "search",
-  searchQuery: "",
+  step: 'search',
+  searchQuery: '',
   recipientUserId: null,
   recipientUsername: null,
-  amountInput: "",
-  description: "",
-  currency: "USD",
+  amountInput: '',
+  description: '',
+  currency: 'USD',
   submitting: false,
   submitError: null,
 };
@@ -45,7 +45,7 @@ const initialState: TransferFormState = {
  * Redux slice managing the transfer wizard form state.
  */
 export const transferFormSlice = createSlice({
-  name: "transferForm",
+  name: 'transferForm',
   initialState,
   reducers: {
     /**
@@ -64,13 +64,10 @@ export const transferFormSlice = createSlice({
      * @param state Current form state.
      * @param action Recipient user id and username.
      */
-    selectRecipient(
-      state,
-      action: PayloadAction<{ userId: string; username: string }>,
-    ) {
+    selectRecipient(state, action: PayloadAction<{ userId: string; username: string }>) {
       state.recipientUserId = action.payload.userId;
       state.recipientUsername = action.payload.username;
-      state.step = "form";
+      state.step = 'form';
       state.submitError = null;
     },
 
@@ -100,7 +97,7 @@ export const transferFormSlice = createSlice({
      * @param state - Current form state.
      */
     goToConfirm(state) {
-      state.step = "confirm";
+      state.step = 'confirm';
       state.submitError = null;
     },
 
@@ -110,7 +107,7 @@ export const transferFormSlice = createSlice({
      * @param state - Current form state.
      */
     backToForm(state) {
-      state.step = "form";
+      state.step = 'form';
     },
 
     /**
@@ -119,7 +116,7 @@ export const transferFormSlice = createSlice({
      * @param state - Current form state.
      */
     backToSearch(state) {
-      state.step = "search";
+      state.step = 'search';
       state.recipientUserId = null;
       state.recipientUsername = null;
     },

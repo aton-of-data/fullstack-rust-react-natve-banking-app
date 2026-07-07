@@ -1,8 +1,4 @@
-import {
-  formatMinorUnits,
-  parseMinorUnits,
-  type FormatMinorUnitsOptions,
-} from "@ficus/money";
+import { formatMinorUnits, parseMinorUnits, type FormatMinorUnitsOptions } from '@ficus/money';
 
 /**
  * Converts a major-unit decimal string (e.g. "12.34") to minor units wire string.
@@ -11,21 +7,16 @@ import {
  * @param minorUnitDigits Number of decimal places (default 2).
  * @returns Canonical minor-unit string.
  */
-export function majorToMinorUnits(
-  majorUnit: string,
-  minorUnitDigits = 2,
-): string {
+export function majorToMinorUnits(majorUnit: string, minorUnitDigits = 2): string {
   const trimmed = majorUnit.trim();
   if (!trimmed) {
-    return "0";
+    return '0';
   }
 
-  const [whole = "0", fraction = ""] = trimmed.split(".");
-  const paddedFraction = fraction
-    .padEnd(minorUnitDigits, "0")
-    .slice(0, minorUnitDigits);
-  const combined = `${whole}${paddedFraction}`.replace(/^0+(?=\d)/, "");
-  return parseMinorUnits(combined || "0");
+  const [whole = '0', fraction = ''] = trimmed.split('.');
+  const paddedFraction = fraction.padEnd(minorUnitDigits, '0').slice(0, minorUnitDigits);
+  const combined = `${whole}${paddedFraction}`.replace(/^0+(?=\d)/, '');
+  return parseMinorUnits(combined || '0');
 }
 
 /**
@@ -36,14 +27,8 @@ export function majorToMinorUnits(
  * @param locale BCP 47 locale.
  * @returns Formatted display string.
  */
-export function formatMoney(
-  minor: string,
-  currency: string,
-  locale?: string,
-): string {
-  const options: FormatMinorUnitsOptions = locale
-    ? { currency, locale }
-    : { currency };
+export function formatMoney(minor: string, currency: string, locale?: string): string {
+  const options: FormatMinorUnitsOptions = locale ? { currency, locale } : { currency };
   return formatMinorUnits(minor, options);
 }
 

@@ -1,4 +1,4 @@
-import type { RootState } from "@/store";
+import type { RootState } from '@/store';
 
 /**
  * Selects the current authentication status.
@@ -17,7 +17,7 @@ export function selectAuthStatus(state: RootState): string {
  * @returns True when authenticated.
  */
 export function selectIsAuthenticated(state: RootState): boolean {
-  return state.auth.status === "authenticated";
+  return state.auth.status === 'authenticated';
 }
 
 /**

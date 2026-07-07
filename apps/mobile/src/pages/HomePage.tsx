@@ -1,12 +1,12 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet } from 'react-native';
 
-import { clearCredentials } from "@/features/auth";
-import { useLogoutMutation } from "@/services";
-import { useAppDispatch } from "@/store/hooks";
-import { spacing } from "@/shared/theme";
-import { BalanceCard, FeedList } from "@/shared/ui/organisms";
-import { MainTemplate } from "@/shared/ui/templates";
-import { Button } from "@/shared/ui/atoms";
+import { clearCredentials } from '@/features/auth';
+import { useLogoutMutation } from '@/services';
+import { useAppDispatch } from '@/store/hooks';
+import { spacing } from '@/shared/theme';
+import { BalanceCard, FeedList } from '@/shared/ui/organisms';
+import { MainTemplate } from '@/shared/ui/templates';
+import { Button } from '@/shared/ui/atoms';
 
 /**
  * Home page with balance card and live activity feed.

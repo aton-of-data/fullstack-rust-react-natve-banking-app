@@ -1,8 +1,8 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View } from 'react-native';
 
-import { colors, spacing } from "@/shared/theme";
-import { formatMoney } from "@/shared/lib/money";
-import { AppText, Card } from "@/shared/ui/atoms";
+import { colors, spacing } from '@/shared/theme';
+import { formatMoney } from '@/shared/lib/money';
+import { AppText, Card } from '@/shared/ui/atoms';
 
 /**
  * Props for the {@link BalanceDisplay} molecule.
@@ -25,11 +25,7 @@ export interface BalanceDisplayProps {
  * @param props.username - Account holder username.
  * @returns Balance card content.
  */
-export function BalanceDisplay({
-  balanceMinor,
-  currency,
-  username,
-}: BalanceDisplayProps) {
+export function BalanceDisplay({ balanceMinor, currency, username }: BalanceDisplayProps) {
   const formatted = formatMoney(balanceMinor, currency);
 
   return (
@@ -56,18 +52,18 @@ const styles = StyleSheet.create({
     borderColor: colors.primaryLight,
   },
   username: {
-    color: "rgba(255,255,255,0.75)",
+    color: 'rgba(255,255,255,0.75)',
     marginTop: spacing.xs,
   },
   label: {
-    color: "rgba(255,255,255,0.85)",
+    color: 'rgba(255,255,255,0.85)',
   },
   amount: {
     color: colors.surface,
     marginTop: spacing.sm,
   },
   accent: {
-    position: "absolute",
+    position: 'absolute',
     right: spacing.lg,
     top: spacing.lg,
     width: 40,

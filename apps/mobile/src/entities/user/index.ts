@@ -1,4 +1,4 @@
-export type { MeResponse, UserSearchItem } from "@ficus/contracts";
+export type { MeResponse, UserSearchItem } from '@ficus/contracts';
 
 /**
  * Domain alias for a Ficus user entity.

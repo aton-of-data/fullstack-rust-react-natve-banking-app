@@ -1,4 +1,4 @@
-import { BalanceCard } from "@/shared/ui/organisms";
+import { BalanceCard } from '@/shared/ui/organisms';
 
 /**
  * Home balance widget composing the balance card organism.

@@ -1,7 +1,7 @@
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { colors, radii, spacing } from "@/shared/theme";
-import { AppText } from "./AppText";
+import { colors, radii, spacing } from '@/shared/theme';
+import { AppText } from './AppText';
 
 /**
  * Props for the {@link ErrorBanner} atom.
@@ -45,14 +45,14 @@ export function ErrorBanner({ message, onDismiss }: ErrorBannerProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FDECEA",
+    backgroundColor: '#FDECEA',
     borderRadius: radii.md,
     padding: spacing.md,
     borderWidth: 1,
     borderColor: colors.error,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     gap: spacing.sm,
   },
   message: {

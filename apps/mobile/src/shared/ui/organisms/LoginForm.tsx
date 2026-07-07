@@ -1,17 +1,13 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View } from 'react-native';
 
-import { spacing } from "@/shared/theme";
-import { selectLoginForm } from "@/features/ui";
-import { useLoginMutation } from "@/services";
-import { setCredentials } from "@/features/auth";
-import {
-  clearLoginForm,
-  setLoginPassword,
-  setLoginUsername,
-} from "@/features/ui";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { AppText, Button, ErrorBanner } from "@/shared/ui/atoms";
-import { FormField } from "@/shared/ui/molecules";
+import { spacing } from '@/shared/theme';
+import { selectLoginForm } from '@/features/ui';
+import { useLoginMutation } from '@/services';
+import { setCredentials } from '@/features/auth';
+import { clearLoginForm, setLoginPassword, setLoginUsername } from '@/features/ui';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { AppText, Button, ErrorBanner } from '@/shared/ui/atoms';
+import { FormField } from '@/shared/ui/molecules';
 
 /**
  * Login form organism wired to Redux and RTK Query.
@@ -40,9 +36,7 @@ export function LoginForm() {
   };
 
   const errorMessage =
-    error && "status" in error
-      ? "Invalid username or password. Please try again."
-      : null;
+    error && 'status' in error ? 'Invalid username or password. Please try again.' : null;
 
   return (
     <View style={styles.container}>
@@ -90,10 +84,10 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   title: {
-    textAlign: "center",
+    textAlign: 'center',
   },
   subtitle: {
-    textAlign: "center",
+    textAlign: 'center',
     marginBottom: spacing.md,
   },
   button: {

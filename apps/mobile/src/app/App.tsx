@@ -1,8 +1,8 @@
-import { Provider } from "react-redux";
-import { StatusBar } from "expo-status-bar";
+import { Provider } from 'react-redux';
+import { StatusBar } from 'expo-status-bar';
 
-import { store } from "@/store";
-import { RootNavigation } from "./navigation";
+import { store } from '@/store';
+import { RootNavigation } from './navigation';
 
 /**
  * Root application component with Redux provider and navigation.

@@ -5,24 +5,24 @@
  *   API_BASE_URL — default http://localhost:8080
  */
 
-import http from "k6/http";
-import { check, sleep } from "k6";
-import { randomIntBetween } from "k6/utils";
-import { uuidv4 } from "https://jslib.k6.io/k6-utils/1.4.0/index.js";
+import http from 'k6/http';
+import { check, sleep } from 'k6';
+import { randomIntBetween } from 'k6/utils';
+import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
 
-const BASE_URL = __ENV.API_BASE_URL || "http://localhost:8080";
+const BASE_URL = __ENV.API_BASE_URL || 'http://localhost:8080';
 
 const USERS = [
-  { username: "alice", password: "password123" },
-  { username: "bob", password: "password123" },
-  { username: "charlie", password: "password123" },
+  { username: 'alice', password: 'password123' },
+  { username: 'bob', password: 'password123' },
+  { username: 'charlie', password: 'password123' },
 ];
 
 export const options = {
   thresholds: {
-    http_req_failed: ["rate<0.05"],
-    http_req_duration: ["p(95)<2000"],
-    checks: ["rate>0.95"],
+    http_req_failed: ['rate<0.05'],
+    http_req_duration: ['p(95)<2000'],
+    checks: ['rate>0.95'],
   },
 };
 
@@ -49,14 +49,14 @@ function login(user) {
     `${BASE_URL}/v1/auth/login`,
     JSON.stringify({ username: user.username, password: user.password }),
     {
-      headers: { "Content-Type": "application/json" },
-      tags: { name: "login" },
+      headers: { 'Content-Type': 'application/json' },
+      tags: { name: 'login' },
     },
   );
 
   check(res, {
-    "login status 200": (r) => r.status === 200,
-    "login has token": (r) => {
+    'login status 200': (r) => r.status === 200,
+    'login has token': (r) => {
       try {
         return JSON.parse(r.body).access_token !== undefined;
       } catch {
@@ -82,8 +82,8 @@ export default function () {
 
   const authHeaders = {
     Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-    "Idempotency-Key": uuidv4(),
+    'Content-Type': 'application/json',
+    'Idempotency-Key': uuidv4(),
   };
 
   const amountMinor = String(randomIntBetween(1, 50));
@@ -93,33 +93,33 @@ export default function () {
     JSON.stringify({
       recipient_username: recipient.username,
       amount_minor: amountMinor,
-      currency: "USD",
-      description: "k6 load test",
+      currency: 'USD',
+      description: 'k6 load test',
     }),
-    { headers: authHeaders, tags: { name: "transfer" } },
+    { headers: authHeaders, tags: { name: 'transfer' } },
   );
 
   check(transferRes, {
-    "transfer accepted": (r) => r.status === 200 || r.status === 422,
+    'transfer accepted': (r) => r.status === 200 || r.status === 422,
   });
 
   const balanceRes = http.get(`${BASE_URL}/v1/accounts/me/balance`, {
     headers: { Authorization: `Bearer ${token}` },
-    tags: { name: "balance" },
+    tags: { name: 'balance' },
   });
 
   check(balanceRes, {
-    "balance status 200": (r) => r.status === 200,
+    'balance status 200': (r) => r.status === 200,
   });
 
   const feedRes = http.get(`${BASE_URL}/v1/feed`, {
     headers: { Authorization: `Bearer ${token}` },
-    tags: { name: "feed" },
+    tags: { name: 'feed' },
   });
 
   check(feedRes, {
-    "feed status 200": (r) => r.status === 200,
-    "feed has items array": (r) => {
+    'feed status 200': (r) => r.status === 200,
+    'feed has items array': (r) => {
       try {
         return Array.isArray(JSON.parse(r.body).items);
       } catch {
@@ -133,6 +133,6 @@ export default function () {
 
 export function setup() {
   const res = http.get(`${BASE_URL}/health/ready`);
-  check(res, { "API ready": (r) => r.status === 200 });
+  check(res, { 'API ready': (r) => r.status === 200 });
   return {};
 }

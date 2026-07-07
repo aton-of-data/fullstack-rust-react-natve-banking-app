@@ -43,7 +43,7 @@ const [loading, setLoading] = useState(false);
 
 // ❌ Side effect in reducer
 someSlice.reducers.charge = (state) => {
-  fetch("/api");
+  fetch('/api');
 };
 
 // ✅ RTK Query or listener for side effects

@@ -1,6 +1,6 @@
-import { StyleSheet, View, type ViewProps } from "react-native";
+import { StyleSheet, View, type ViewProps } from 'react-native';
 
-import { colors, radii, shadows, spacing } from "@/shared/theme";
+import { colors, radii, shadows, spacing } from '@/shared/theme';
 
 /**
  * Props for the {@link Card} atom.

@@ -1,6 +1,6 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View } from 'react-native';
 
-import { spacing } from "@/shared/theme";
+import { spacing } from '@/shared/theme';
 import {
   backToForm,
   selectRecipientUsername,
@@ -9,12 +9,12 @@ import {
   submitFailed,
   submitStarted,
   submitSucceeded,
-} from "@/features/transfer-form";
-import { selectAmountInput, selectDescription } from "@/features/transfer-form";
-import { majorToMinorUnits, formatMoney } from "@/shared/lib/money";
-import { useCreateTransferMutation } from "@/services";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { AppText, Button, Card, ErrorBanner } from "@/shared/ui/atoms";
+} from '@/features/transfer-form';
+import { selectAmountInput, selectDescription } from '@/features/transfer-form';
+import { majorToMinorUnits, formatMoney } from '@/shared/lib/money';
+import { useCreateTransferMutation } from '@/services';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { AppText, Button, Card, ErrorBanner } from '@/shared/ui/atoms';
 
 /**
  * Transfer confirmation and submission organism.
@@ -31,7 +31,7 @@ export function TransferConfirmation() {
   const [createTransfer] = useCreateTransferMutation();
 
   const minor = majorToMinorUnits(amountInput);
-  const formatted = formatMoney(minor, "USD");
+  const formatted = formatMoney(minor, 'USD');
 
   const handleConfirm = async (): Promise<void> => {
     if (!recipient) {
@@ -42,13 +42,13 @@ export function TransferConfirmation() {
       const request = {
         recipient_username: recipient,
         amount_minor: minor,
-        currency: "USD",
+        currency: 'USD',
         ...(description ? { description } : {}),
       };
       await createTransfer(request).unwrap();
       dispatch(submitSucceeded());
     } catch {
-      dispatch(submitFailed("Transfer failed. Please try again."));
+      dispatch(submitFailed('Transfer failed. Please try again.'));
     }
   };
 
@@ -80,11 +80,7 @@ export function TransferConfirmation() {
       </Card>
 
       <View style={styles.actions}>
-        <Button
-          label="Back"
-          variant="ghost"
-          onPress={() => dispatch(backToForm())}
-        />
+        <Button label="Back" variant="ghost" onPress={() => dispatch(backToForm())} />
         <Button
           label="Send Money"
           onPress={() => void handleConfirm()}
@@ -104,9 +100,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   actions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   primary: {
     flex: 1,

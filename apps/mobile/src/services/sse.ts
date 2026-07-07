@@ -1,4 +1,4 @@
-import type { FeedItem } from "@ficus/contracts";
+import type { FeedItem } from '@ficus/contracts';
 
 /**
  * Parses a Server-Sent Events text chunk into feed items.
@@ -8,14 +8,14 @@ import type { FeedItem } from "@ficus/contracts";
  */
 export function parseSseChunk(chunk: string): FeedItem[] {
   const items: FeedItem[] = [];
-  const lines = chunk.split("\n");
+  const lines = chunk.split('\n');
 
   for (const line of lines) {
-    if (!line.startsWith("data:")) {
+    if (!line.startsWith('data:')) {
       continue;
     }
     const payload = line.slice(5).trim();
-    if (!payload || payload === "keep-alive") {
+    if (!payload || payload === 'keep-alive') {
       continue;
     }
     try {
@@ -45,18 +45,18 @@ export function subscribeFeedSse(
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    let buffer = "";
+    let buffer = '';
 
     const cleanup = (): void => {
       xhr.abort();
     };
 
-    signal.addEventListener("abort", cleanup);
+    signal.addEventListener('abort', cleanup);
 
-    xhr.open("GET", url);
-    xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-    xhr.setRequestHeader("Accept", "text/event-stream");
-    xhr.setRequestHeader("Cache-Control", "no-cache");
+    xhr.open('GET', url);
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    xhr.setRequestHeader('Accept', 'text/event-stream');
+    xhr.setRequestHeader('Cache-Control', 'no-cache');
 
     xhr.onprogress = (): void => {
       const newText = xhr.responseText.slice(buffer.length);
@@ -68,21 +68,21 @@ export function subscribeFeedSse(
     };
 
     xhr.onload = (): void => {
-      signal.removeEventListener("abort", cleanup);
+      signal.removeEventListener('abort', cleanup);
       resolve();
     };
 
     xhr.onerror = (): void => {
-      signal.removeEventListener("abort", cleanup);
+      signal.removeEventListener('abort', cleanup);
       if (signal.aborted) {
         resolve();
         return;
       }
-      reject(new Error("SSE connection failed"));
+      reject(new Error('SSE connection failed'));
     };
 
     xhr.onabort = (): void => {
-      signal.removeEventListener("abort", cleanup);
+      signal.removeEventListener('abort', cleanup);
       resolve();
     };
 

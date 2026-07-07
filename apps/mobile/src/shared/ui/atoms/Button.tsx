@@ -6,19 +6,19 @@ import {
   type PressableProps,
   type StyleProp,
   type ViewStyle,
-} from "react-native";
+} from 'react-native';
 
-import { colors, radii, spacing, typography } from "@/shared/theme";
+import { colors, radii, spacing, typography } from '@/shared/theme';
 
 /**
  * Button visual variants.
  */
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
 /**
  * Props for the {@link Button} atom.
  */
-export interface ButtonProps extends Omit<PressableProps, "children"> {
+export interface ButtonProps extends Omit<PressableProps, 'children'> {
   /** Button label text. */
   label: string;
   /** Visual style variant. */
@@ -27,17 +27,14 @@ export interface ButtonProps extends Omit<PressableProps, "children"> {
   loading?: boolean;
 }
 
-const variantStyles: Record<
-  ButtonVariant,
-  { bg: string; text: string; border?: string }
-> = {
+const variantStyles: Record<ButtonVariant, { bg: string; text: string; border?: string }> = {
   primary: { bg: colors.primary, text: colors.surface },
   secondary: {
     bg: colors.surface,
     text: colors.primary,
     border: colors.primary,
   },
-  ghost: { bg: "transparent", text: colors.primaryLight },
+  ghost: { bg: 'transparent', text: colors.primaryLight },
   danger: { bg: colors.error, text: colors.surface },
 };
 
@@ -55,7 +52,7 @@ const variantStyles: Record<
  */
 export function Button({
   label,
-  variant = "primary",
+  variant = 'primary',
   loading = false,
   disabled,
   style,
@@ -76,7 +73,7 @@ export function Button({
         baseStyle,
         {
           backgroundColor: v.bg,
-          borderColor: v.border ?? "transparent",
+          borderColor: v.border ?? 'transparent',
           opacity: pressed ? 0.85 : 1,
         },
         isDisabled ? styles.disabled : null,
@@ -99,12 +96,12 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     borderWidth: 1.5,
     paddingHorizontal: spacing.lg,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   label: {
     fontSize: typography.fontSize.md,
-    fontWeight: "600",
+    fontWeight: '600',
   },
   disabled: {
     opacity: 0.5,

@@ -1,5 +1,5 @@
-import { LoginForm } from "@/shared/ui/organisms";
-import { AuthTemplate } from "@/shared/ui/templates";
+import { LoginForm } from '@/shared/ui/organisms';
+import { AuthTemplate } from '@/shared/ui/templates';
 
 /**
  * Login page composing auth template and login form.

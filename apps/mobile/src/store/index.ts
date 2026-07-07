@@ -1,11 +1,11 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore } from '@reduxjs/toolkit';
 
-import { authReducer } from "@/features/auth";
-import { transferFormReducer } from "@/features/transfer-form";
-import { uiReducer } from "@/features/ui";
-import { baseApi } from "@/services/baseApi";
+import { authReducer } from '@/features/auth';
+import { transferFormReducer } from '@/features/transfer-form';
+import { uiReducer } from '@/features/ui';
+import { baseApi } from '@/services/baseApi';
 
-import { bootstrapAuth, listenerMiddleware } from "./listenerMiddleware";
+import { bootstrapAuth, listenerMiddleware } from './listenerMiddleware';
 
 /**
  * Configured Redux store with RTK Query and listener middleware.
@@ -18,9 +18,7 @@ export const store = configureStore({
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware()
-      .concat(baseApi.middleware)
-      .prepend(listenerMiddleware.middleware),
+    getDefaultMiddleware().concat(baseApi.middleware).prepend(listenerMiddleware.middleware),
 });
 
 /** Root state type derived from the store. */

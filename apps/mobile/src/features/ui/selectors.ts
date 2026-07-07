@@ -1,4 +1,4 @@
-import type { RootState } from "@/store";
+import type { RootState } from '@/store';
 
 /**
  * Selects login form field values.

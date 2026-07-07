@@ -1,6 +1,6 @@
-import { StyleSheet, TextInput, type TextInputProps } from "react-native";
+import { StyleSheet, TextInput, type TextInputProps } from 'react-native';
 
-import { colors, radii, spacing, typography } from "@/shared/theme";
+import { colors, radii, spacing, typography } from '@/shared/theme';
 
 /**
  * Props for the {@link Input} atom.
@@ -19,12 +19,7 @@ export interface InputProps extends TextInputProps {
  * @param props.accessibilityLabel - Accessibility label.
  * @returns Styled text input.
  */
-export function Input({
-  hasError = false,
-  style,
-  accessibilityLabel,
-  ...rest
-}: InputProps) {
+export function Input({ hasError = false, style, accessibilityLabel, ...rest }: InputProps) {
   return (
     <TextInput
       accessibilityLabel={accessibilityLabel}

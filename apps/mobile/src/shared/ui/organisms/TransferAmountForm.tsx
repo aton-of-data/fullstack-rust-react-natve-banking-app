@@ -1,18 +1,18 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View } from 'react-native';
 
-import { spacing } from "@/shared/theme";
+import { spacing } from '@/shared/theme';
 import {
   backToSearch,
   goToConfirm,
   selectRecipientUsername,
   setAmountInput,
   setDescription,
-} from "@/features/transfer-form";
-import { selectAmountInput, selectDescription } from "@/features/transfer-form";
-import { isValidAmountInput } from "@/shared/lib/money";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { AppText, Button } from "@/shared/ui/atoms";
-import { FormField } from "@/shared/ui/molecules";
+} from '@/features/transfer-form';
+import { selectAmountInput, selectDescription } from '@/features/transfer-form';
+import { isValidAmountInput } from '@/shared/lib/money';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { AppText, Button } from '@/shared/ui/atoms';
+import { FormField } from '@/shared/ui/molecules';
 
 /**
  * Transfer amount and memo form organism.
@@ -39,7 +39,7 @@ export function TransferAmountForm() {
         accessibilityLabel="Transfer amount"
         {...(amountInput && !valid
           ? {
-              hint: "Enter a valid amount greater than zero",
+              hint: 'Enter a valid amount greater than zero',
               hintIsError: true,
               hasError: true,
             }
@@ -55,11 +55,7 @@ export function TransferAmountForm() {
       />
 
       <View style={styles.actions}>
-        <Button
-          label="Back"
-          variant="ghost"
-          onPress={() => dispatch(backToSearch())}
-        />
+        <Button label="Back" variant="ghost" onPress={() => dispatch(backToSearch())} />
         <Button
           label="Review"
           onPress={() => dispatch(goToConfirm())}
@@ -76,9 +72,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   actions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: spacing.sm,
   },
   primary: {

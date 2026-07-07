@@ -1,12 +1,12 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View } from 'react-native';
 
-import { spacing } from "@/shared/theme";
-import { selectRecipient, setSearchQuery } from "@/features/transfer-form";
-import { selectSearchQuery } from "@/features/transfer-form";
-import { useSearchUsersQuery } from "@/services";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { AppText, Spinner } from "@/shared/ui/atoms";
-import { EmptyState, FormField, SearchResultItem } from "@/shared/ui/molecules";
+import { spacing } from '@/shared/theme';
+import { selectRecipient, setSearchQuery } from '@/features/transfer-form';
+import { selectSearchQuery } from '@/features/transfer-form';
+import { useSearchUsersQuery } from '@/services';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { AppText, Spinner } from '@/shared/ui/atoms';
+import { EmptyState, FormField, SearchResultItem } from '@/shared/ui/molecules';
 
 /**
  * Recipient search organism for the transfer wizard.
@@ -50,10 +50,7 @@ export function RecipientSearch() {
       ) : null}
 
       {trimmed.length >= 2 && !isFetching && data?.items.length === 0 ? (
-        <EmptyState
-          title="No users found"
-          description="Try a different username."
-        />
+        <EmptyState title="No users found" description="Try a different username." />
       ) : null}
 
       {data?.items.map((user) => (

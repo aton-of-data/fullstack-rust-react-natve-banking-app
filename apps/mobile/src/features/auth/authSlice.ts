@@ -1,10 +1,9 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 /**
  * Authentication status values.
  */
-export type AuthStatus =
-  "idle" | "loading" | "authenticated" | "unauthenticated";
+export type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'unauthenticated';
 
 /**
  * Auth slice state shape.
@@ -23,7 +22,7 @@ export interface AuthState {
 }
 
 const initialState: AuthState = {
-  status: "idle",
+  status: 'idle',
   accessToken: null,
   userId: null,
   username: null,
@@ -46,7 +45,7 @@ export interface AuthCredentials {
  * Redux slice managing authentication state.
  */
 export const authSlice = createSlice({
-  name: "auth",
+  name: 'auth',
   initialState,
   reducers: {
     /**
@@ -55,7 +54,7 @@ export const authSlice = createSlice({
      * @param state - Current auth state.
      */
     rehydrateStarted(state) {
-      state.status = "loading";
+      state.status = 'loading';
     },
 
     /**
@@ -68,7 +67,7 @@ export const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.userId = action.payload.userId;
       state.username = action.payload.username;
-      state.status = "authenticated";
+      state.status = 'authenticated';
       state.hydrated = true;
     },
 
@@ -78,7 +77,7 @@ export const authSlice = createSlice({
      * @param state - Current auth state.
      */
     rehydrateEmpty(state) {
-      state.status = "unauthenticated";
+      state.status = 'unauthenticated';
       state.hydrated = true;
     },
 
@@ -91,18 +90,14 @@ export const authSlice = createSlice({
       state.accessToken = null;
       state.userId = null;
       state.username = null;
-      state.status = "unauthenticated";
+      state.status = 'unauthenticated';
     },
   },
 });
 
 /** Auth slice action creators. */
-export const {
-  rehydrateStarted,
-  setCredentials,
-  rehydrateEmpty,
-  clearCredentials,
-} = authSlice.actions;
+export const { rehydrateStarted, setCredentials, rehydrateEmpty, clearCredentials } =
+  authSlice.actions;
 
 /** Auth slice reducer. */
 export const authReducer = authSlice.reducer;

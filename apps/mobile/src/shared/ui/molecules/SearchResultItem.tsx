@@ -1,8 +1,8 @@
-import type { UserSearchItem } from "@ficus/contracts";
-import { Pressable, StyleSheet } from "react-native";
+import type { UserSearchItem } from '@ficus/contracts';
+import { Pressable, StyleSheet } from 'react-native';
 
-import { colors, radii, spacing } from "@/shared/theme";
-import { AppText } from "@/shared/ui/atoms";
+import { colors, radii, spacing } from '@/shared/theme';
+import { AppText } from '@/shared/ui/atoms';
 
 /**
  * Props for the {@link SearchResultItem} molecule.

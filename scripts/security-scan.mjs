@@ -9,19 +9,19 @@
  * Gracefully skips tools that are not installed locally.
  */
 
-import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 function parseArgs(argv) {
-  return { ci: argv.includes("--ci") };
+  return { ci: argv.includes('--ci') };
 }
 
-function toolAvailable(cmd, args = ["--version"]) {
-  const result = spawnSync(cmd, args, { encoding: "utf8" });
+function toolAvailable(cmd, args = ['--version']) {
+  const result = spawnSync(cmd, args, { encoding: 'utf8' });
   return result.status === 0;
 }
 
@@ -33,16 +33,16 @@ function toolAvailable(cmd, args = ["--version"]) {
 function runTool(name, cmd) {
   const [bin, ...args] = cmd;
 
-  if (!toolAvailable(bin, ["--version"]) && !toolAvailable(bin, ["version"])) {
+  if (!toolAvailable(bin, ['--version']) && !toolAvailable(bin, ['version'])) {
     console.warn(`[skip] ${name}: ${bin} not installed`);
     return { skipped: true, ok: true };
   }
 
-  console.log(`[run] ${name}: ${cmd.join(" ")}`);
+  console.log(`[run] ${name}: ${cmd.join(' ')}`);
   const result = spawnSync(bin, args, {
     cwd: REPO_ROOT,
-    stdio: "inherit",
-    encoding: "utf8",
+    stdio: 'inherit',
+    encoding: 'utf8',
   });
 
   const ok = result.status === 0;
@@ -60,29 +60,16 @@ function main() {
   const results = [];
 
   results.push(
-    runTool("gitleaks", [
-      "gitleaks",
-      "detect",
-      "--source",
-      REPO_ROOT,
-      "--no-banner",
-      "--redact",
-    ]),
+    runTool('gitleaks', ['gitleaks', 'detect', '--source', REPO_ROOT, '--no-banner', '--redact']),
   );
 
   const dockerfile = `${REPO_ROOT}/infra/docker/Dockerfile.api`;
-  if (existsSync(dockerfile) && toolAvailable("trivy", ["--version"])) {
+  if (existsSync(dockerfile) && toolAvailable('trivy', ['--version'])) {
     results.push(
-      runTool("trivy-config", [
-        "trivy",
-        "config",
-        "--severity",
-        "HIGH,CRITICAL",
-        REPO_ROOT,
-      ]),
+      runTool('trivy-config', ['trivy', 'config', '--severity', 'HIGH,CRITICAL', REPO_ROOT]),
     );
-  } else if (!toolAvailable("trivy", ["--version"])) {
-    console.warn("[skip] trivy: not installed");
+  } else if (!toolAvailable('trivy', ['--version'])) {
+    console.warn('[skip] trivy: not installed');
     results.push({ skipped: true, ok: true });
   }
 
@@ -94,8 +81,7 @@ function main() {
   }
 
   if (allSkipped) {
-    const msg =
-      "No security tools installed (gitleaks, trivy). Install for local scans.";
+    const msg = 'No security tools installed (gitleaks, trivy). Install for local scans.';
     if (opts.ci) {
       console.warn(`[skip] ${msg}`);
       process.exit(0);
@@ -104,7 +90,7 @@ function main() {
     process.exit(0);
   }
 
-  console.log("Security scan complete.");
+  console.log('Security scan complete.');
   process.exit(0);
 }
 

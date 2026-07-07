@@ -22,8 +22,8 @@ src/features/<feature>/api.ts  # injectEndpoints
 export const transfersApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     sendTransfer: build.mutation<TransferResult, SendTransferRequest>({
-      query: (body) => ({ url: "/transfers", method: "POST", body }),
-      invalidatesTags: ["Balance", "Feed"],
+      query: (body) => ({ url: '/transfers', method: 'POST', body }),
+      invalidatesTags: ['Balance', 'Feed'],
     }),
   }),
 });

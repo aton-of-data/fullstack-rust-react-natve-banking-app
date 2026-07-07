@@ -1,12 +1,7 @@
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, spacing } from "@/shared/theme";
+import { colors, spacing } from '@/shared/theme';
 
 /**
  * Props for the {@link AuthTemplate} layout.
@@ -27,13 +22,10 @@ export function AuthTemplate({ children }: AuthTemplateProps) {
   return (
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.flex}
       >
-        <ScrollView
-          contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           {children}
         </ScrollView>
       </KeyboardAvoidingView>
@@ -51,7 +43,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flexGrow: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     padding: spacing.lg,
   },
 });

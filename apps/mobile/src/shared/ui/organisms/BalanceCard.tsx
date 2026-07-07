@@ -1,11 +1,11 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View } from 'react-native';
 
-import { spacing } from "@/shared/theme";
-import { selectUsername } from "@/features/auth";
-import { useGetBalanceQuery } from "@/services";
-import { useAppSelector } from "@/store/hooks";
-import { AppText, ErrorBanner, Spinner } from "@/shared/ui/atoms";
-import { BalanceDisplay } from "@/shared/ui/molecules";
+import { spacing } from '@/shared/theme';
+import { selectUsername } from '@/features/auth';
+import { useGetBalanceQuery } from '@/services';
+import { useAppSelector } from '@/store/hooks';
+import { AppText, ErrorBanner, Spinner } from '@/shared/ui/atoms';
+import { BalanceDisplay } from '@/shared/ui/molecules';
 
 /**
  * Balance card organism with loading and error states.
@@ -51,6 +51,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   retry: {
-    textAlign: "center",
+    textAlign: 'center',
   },
 });
