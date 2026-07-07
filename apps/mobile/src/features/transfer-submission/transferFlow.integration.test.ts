@@ -17,10 +17,7 @@ import {
 
 describe('transfer confirmation workflow state', () => {
   it('generates key on confirm step and preserves it on retry', () => {
-    let form = transferFormReducer(
-      undefined,
-      selectRecipient({ userId: 'u1', username: 'bob' }),
-    );
+    let form = transferFormReducer(undefined, selectRecipient({ userId: 'u1', username: 'bob' }));
     form = transferFormReducer(form, setAmountInput('10.00'));
     form = transferFormReducer(form, goToConfirm());
     expect(form.step).toBe('confirm');

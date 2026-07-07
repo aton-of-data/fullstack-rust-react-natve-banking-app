@@ -4,11 +4,7 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
  * Transfer submission lifecycle status.
  */
 export type TransferSubmissionStatus =
-  | 'idle'
-  | 'submitting'
-  | 'unknown_outcome'
-  | 'succeeded'
-  | 'failed';
+  'idle' | 'submitting' | 'unknown_outcome' | 'succeeded' | 'failed';
 
 /**
  * Redux-owned transfer submission state for retry-safe idempotency.
@@ -59,6 +55,7 @@ export const transferSubmissionSlice = createSlice({
     /**
      * Begins a new transfer attempt by generating a fresh idempotency key.
      *
+     * @param state Current submission state.
      * @returns Updated submission state.
      */
     beginTransferAttempt(state) {

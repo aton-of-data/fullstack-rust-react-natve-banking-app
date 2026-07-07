@@ -31,4 +31,23 @@ describe('mapTransferError', () => {
     const mapped = mapTransferError({ status: 401, data: { code: 'UNAUTHORIZED' } });
     expect(mapped.retryable).toBe(false);
   });
+
+  it('maps recipient not found and validation errors', () => {
+    expect(mapTransferError({ status: 404, data: { code: 'RECIPIENT_NOT_FOUND' } }).code).toBe(
+      'RECIPIENT_NOT_FOUND',
+    );
+    expect(mapTransferError({ status: 422, data: { message: 'bad amount' } }).code).toBe(
+      'VALIDATION_ERROR',
+    );
+  });
+
+  it('maps timeout and server errors as retryable', () => {
+    expect(mapTransferError({ status: 'TIMEOUT_ERROR' }).retryable).toBe(true);
+    expect(mapTransferError({ status: 503, data: { code: 'SERVER_ERROR' } }).retryable).toBe(true);
+  });
+
+  it('maps unknown object shapes safely', () => {
+    expect(mapTransferError({ status: 418 }).retryable).toBe(false);
+    expect(mapTransferError('boom').code).toBe('UNKNOWN_ERROR');
+  });
 });
