@@ -159,15 +159,27 @@ Balances are funded from a system account with full ledger audit trail. **Never 
 
 ## Testing Highlights
 
-Money integrity tests live in `apps/api/crates/testkit/tests/`:
+Money integrity and HTTP contract tests live in `apps/api/crates/testkit/tests/`:
 
-- `transfer_concurrency_test.rs` — 100 concurrent transfers from one account
+- `auth_http_api_test.rs` — login/me/logout, 401/429 contracts, audit correlation
+- `transfer_http_api_test.rs` — transfer idempotency, validation, exact 100-concurrent HTTP test
+- `feed_http_api_test.rs` — feed pagination, SSE content-type, metrics scrape
+- `transfer_concurrency_test.rs` — 100 concurrent transfers (exact 50 success / 50 decline)
+- `transfer_concurrency_extended_test.rs` — cross-account contention, inverse-direction locking
 - `transfer_idempotency_test.rs` — duplicate idempotency key does not double-charge
-- `money_conservation_test.rs` — total system money conserved
+- `transfer_partial_state_test.rs` — failed transfers leave no partial state
+- `ledger_db_immutability_test.rs` — append-only ledger/audit at database level
 - `ledger_balance_reconciliation_test.rs` — balances match ledger sums
 
 ```bash
-cd apps/api && cargo nextest run --workspace
+# Postgres via Docker testcontainers, or:
+export TEST_DATABASE_URL=postgres://user@localhost:5432/postgres
+
+cd apps/api && cargo test -p ficus-testkit -- --test-threads=1
+cd apps/api && cargo test --workspace -- --test-threads=1
+pnpm --filter @ficus/mobile test
+node scripts/performance/run-k6.mjs --ci   # skips if k6 missing
+bash scripts/performance/reconcile-after-load.sh
 ```
 
 ## Documentation Index
