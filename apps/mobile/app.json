@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Ficus",
+    "slug": "ficus-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "ficus",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0B3D2E"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ficus.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0B3D2E"
+      },
+      "package": "com.ficus.mobile"
+    },
+    "extra": {
+      "apiUrl": "http://localhost:8080"
+    }
+  }
+}
