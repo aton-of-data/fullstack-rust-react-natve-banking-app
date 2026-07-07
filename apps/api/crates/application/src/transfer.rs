@@ -3,6 +3,7 @@ use std::sync::Arc;
 use ficus_domain::errors::DomainError;
 use ficus_domain::idempotency::{request_fingerprint, validate_idempotency_key};
 use metrics::counter;
+use tracing::warn;
 
 use crate::ports::{
     FeedBroadcaster, FeedItem, IdempotencyRepository, Page, TransferExecutor, TransferRecord,
@@ -95,7 +96,9 @@ impl TransferService {
                 description: record.description.clone(),
                 created_at: record.created_at,
             };
-            let _ = self.feed.publish(item).await;
+            if let Err(err) = self.feed.publish(item).await {
+                warn!(transfer_id = %record.id, error = %err, "failed to publish feed event after transfer");
+            }
         }
 
         Ok(record)

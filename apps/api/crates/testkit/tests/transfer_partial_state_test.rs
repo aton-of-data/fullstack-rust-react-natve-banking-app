@@ -2,8 +2,8 @@
 
 use ficus_domain::errors::DomainError;
 use ficus_testkit::{
-    count_all_transfers, count_completed_transfers, execute_transfer, orphan_ledger_entries,
-    setup_isolated_test_db, total_balance_minor, TestAppBuilder,
+    count_all_transfers, count_audit_events, count_completed_transfers, execute_transfer,
+    orphan_ledger_entries, setup_isolated_test_db, total_balance_minor, TestAppBuilder,
 };
 
 #[tokio::test]
@@ -21,6 +21,7 @@ async fn failed_transfer_leaves_no_partial_state() {
     let before_completed = count_completed_transfers(&db)
         .await
         .expect("before completed");
+    let before_audit = count_audit_events(&db).await.expect("before audit");
 
     let err = execute_transfer(
         &app,
@@ -53,6 +54,13 @@ async fn failed_transfer_leaves_no_partial_state() {
             .expect("orphans")
             .is_empty(),
         "failed transfer must not leave orphan ledger rows"
+    );
+
+    let declined_audits = count_audit_events(&db).await.expect("audit count");
+    assert_eq!(
+        declined_audits,
+        before_audit + 1,
+        "insufficient-funds decline must persist exactly one audit event outside the rolled-back transaction"
     );
 }
 

@@ -60,6 +60,44 @@ impl PostgresTransferExecutor {
         Self { db }
     }
 
+    async fn record_declined_transfer_audit(
+        &self,
+        request: &TransferExecutionRequest<'_>,
+        actor_user_id: Uuid,
+    ) {
+        let draft = AuditEventDraft {
+            event_type: AuditEventType::TransferDeclined,
+            actor_user_id: Some(actor_user_id),
+            transfer_id: None,
+            request_id: request.request_id.to_string(),
+            trace_id: request.trace_id.to_string(),
+            metadata: BTreeMap::from([
+                ("reason".to_string(), "insufficient_funds".to_string()),
+                (
+                    "recipient_username".to_string(),
+                    request.recipient_username.to_string(),
+                ),
+                ("amount_minor".to_string(), request.amount_minor.to_string()),
+                (
+                    "currency_code".to_string(),
+                    request.currency_code.to_string(),
+                ),
+            ]),
+            occurred_at: Utc::now(),
+        };
+
+        if let Err(err) = AuditEvent::insert(audit_draft_to_active(draft))
+            .exec(&self.db)
+            .await
+        {
+            warn!(
+                error = %err,
+                actor_user_id = %actor_user_id,
+                "failed to persist declined transfer audit event"
+            );
+        }
+    }
+
     async fn execute_with_retry(
         &self,
         request: TransferExecutionRequest<'_>,
@@ -160,6 +198,10 @@ impl PostgresTransferExecutor {
             }
             Err(err) => {
                 let _ = txn.rollback().await;
+                if matches!(&err, DomainError::InsufficientFunds) {
+                    self.record_declined_transfer_audit(request, sender_user.id)
+                        .await;
+                }
                 Err(err)
             }
         }
@@ -232,22 +274,6 @@ impl PostgresTransferExecutor {
         }
 
         if sender_balance.balance_minor < amount_minor {
-            append_audit(
-                txn,
-                AuditEventDraft {
-                    event_type: AuditEventType::TransferDeclined,
-                    actor_user_id: Some(sender_user.id),
-                    transfer_id: None,
-                    request_id: request.request_id.to_string(),
-                    trace_id: request.trace_id.to_string(),
-                    metadata: BTreeMap::from([
-                        ("reason".to_string(), "insufficient_funds".to_string()),
-                        ("transfer_id".to_string(), transfer_id.to_string()),
-                    ]),
-                    occurred_at: Utc::now(),
-                },
-            )
-            .await?;
             return Err(DomainError::InsufficientFunds);
         }
 
