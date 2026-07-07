@@ -1,0 +1,162 @@
+version: 2
+canonical_source: context.md
+project:
+  name: ficusplatforms
+  description: Money transfer and balance tracking app (Venmo-like)
+  frontend: react-native
+  backend: rust
+  package_managers:
+  - npm
+  - cargo
+
+invariants:
+- Every code change requires a tracked work item under docs/ai/work-items/<feature-id>/
+- Every work item must move through Architecture → Implementation → Documentation → QA → Code Review → Commit
+- A failing gate returns work to the Implementation Agent or Documenter Agent as appropriate
+- Reducers must remain pure; side effects are never allowed inside reducers
+- No feature is complete without acceptance criteria, tests, JSDoc documentation, verification evidence, and independent review
+- The Committer Agent is the only agent allowed to create commits
+- The Committer Agent may commit only after all prior gates have passed, Conventional Commits are validated, and authorization exists
+- Never bypass the pipeline because a change looks small
+- Never introduce a new dependency, framework, abstraction, or architectural pattern without documenting the rationale
+- Never claim success without evidence
+- Conventional Commits are enforced via commitlint; lint, prettier, and JSDoc are enforced via ESLint
+
+pipeline:
+  stages:
+  - id: architecture
+    agent: architecture
+    artifact: docs/ai/work-items/{feature_id}/01-architecture.md
+    next: implementation
+    blocked_returns_to: null
+  - id: implementation
+    agent: implementation
+    artifact: docs/ai/work-items/{feature_id}/02-implementation.md
+    requires: architecture
+    next: documentation
+    fail_returns_to: architecture
+  - id: documentation
+    agent: documenter
+    artifact: docs/ai/work-items/{feature_id}/03-documentation.md
+    requires: implementation
+    outcomes:
+    - PASS
+    - FAIL
+    - BLOCKED
+    pass_next: quality_assurance
+    fail_returns_to: implementation
+    doc_only_fail_returns_to: documenter
+    blocked_returns_to: architecture
+  - id: quality_assurance
+    agent: quality-assurance
+    artifact: docs/ai/work-items/{feature_id}/04-qa-report.md
+    requires: documentation
+    outcomes:
+    - PASS
+    - FAIL
+    - BLOCKED
+    pass_next: code_review
+    fail_returns_to: implementation
+    blocked_returns_to: architecture
+  - id: code_review
+    agent: code-reviewer
+    artifact: docs/ai/work-items/{feature_id}/05-code-review.md
+    requires: quality_assurance
+    outcomes:
+    - APPROVED
+    - CHANGES_REQUESTED
+    - BLOCKED
+    pass_next: commit
+    fail_returns_to: implementation
+    doc_fail_returns_to: documenter
+    blocked_returns_to: architecture
+  - id: commit
+    agent: committer
+    artifact: docs/ai/work-items/{feature_id}/06-commit-report.md
+    requires: code_review
+    exclusive_git_write: true
+    requires_conventional_commits: true
+
+policies:
+  engineering_principles: .ai/policies/engineering-principles.md
+  delivery_pipeline: .ai/policies/delivery-pipeline.md
+  frontend_react_native: .ai/policies/frontend-react-native.md
+  frontend_tooling: .ai/policies/frontend-tooling.md
+  documentation: .ai/policies/documentation.md
+  backend_rust: .ai/policies/backend-rust.md
+  quality_and_security: .ai/policies/quality-and-security.md
+  git_and_commits: .ai/policies/git-and-commits.md
+
+agents:
+  architecture: .ai/agents/architecture.md
+  implementation: .ai/agents/implementation.md
+  documenter: .ai/agents/documenter.md
+  quality_assurance: .ai/agents/quality-assurance.md
+  code_reviewer: .ai/agents/code-reviewer.md
+  committer: .ai/agents/committer.md
+
+skills:
+  repository_discovery: .ai/skills/repository-discovery.md
+  feature_planning: .ai/skills/feature-planning.md
+  architecture_decision_record: .ai/skills/architecture-decision-record.md
+  react_native_redux_toolkit: .ai/skills/react-native-redux-toolkit.md
+  rtk_query_api: .ai/skills/rtk-query-api.md
+  rust_api_architecture: .ai/skills/rust-api-architecture.md
+  jsdoc_and_mermaid: .ai/skills/jsdoc-and-mermaid.md
+  conventional_commits: .ai/skills/conventional-commits.md
+  testing_and_verification: .ai/skills/testing-and-verification.md
+  security_review: .ai/skills/security-review.md
+  git_commit: .ai/skills/git-commit.md
+
+templates:
+  feature_work_item: .ai/templates/feature-work-item.md
+  architecture_handoff: .ai/templates/architecture-handoff.md
+  implementation_handoff: .ai/templates/implementation-handoff.md
+  documentation_handoff: .ai/templates/documentation-handoff.md
+  qa_report: .ai/templates/qa-report.md
+  code_review_report: .ai/templates/code-review-report.md
+  commit_report: .ai/templates/commit-report.md
+  frontend_tooling: .ai/templates/frontend-tooling/
+
+quality_gates:
+  frontend:
+  - command: npm run typecheck
+    required: true
+    note: Add when frontend scaffold exists
+  - command: npm run lint
+    required: true
+    note: ESLint + eslint-plugin-jsdoc
+  - command: npm run format:check
+    required: true
+    note: Prettier --check
+  - command: npm test
+    required: true
+  git:
+  - command: npx commitlint --edit
+    required: true
+    note: commit-msg hook; Committer validates message format
+  backend:
+  - command: cargo fmt --check
+  - command: cargo clippy --all-targets --all-features -- -D warnings
+  - command: cargo test
+  - command: cargo nextest run
+    optional: true
+  - command: cargo deny check
+    optional: true
+  - command: cargo audit
+    optional: true
+
+prohibited_patterns:
+- useState for application state
+- useReducer for application state
+- createContext / useContext for application state
+- fetch or axios in UI layers
+- side effects inside reducers
+- ORM entities in domain layer
+- direct API calls bypassing RTK Query
+- exported symbols without JSDoc
+- non-conventional commit messages
+- TODO test later
+- undocumented lint disables
+- pipeline bypass for small changes
+- prettier/eslint disable without ADR
