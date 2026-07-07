@@ -78,6 +78,8 @@ pub struct TestAppBuilder {
     start_server: bool,
     login_rate_limit_per_min: Option<u32>,
     transfer_rate_limit_per_min: Option<u32>,
+    environment: Option<String>,
+    metrics_auth_token: Option<String>,
 }
 
 impl TestAppBuilder {
@@ -90,6 +92,8 @@ impl TestAppBuilder {
             start_server: false,
             login_rate_limit_per_min: None,
             transfer_rate_limit_per_min: None,
+            environment: None,
+            metrics_auth_token: None,
         }
     }
 
@@ -123,6 +127,18 @@ impl TestAppBuilder {
         self
     }
 
+    /// Overrides deployment environment for security contract tests.
+    pub fn with_environment(mut self, environment: impl Into<String>) -> Self {
+        self.environment = Some(environment.into());
+        self
+    }
+
+    /// Sets the bearer token required for `/metrics` when auth is enforced.
+    pub fn with_metrics_auth_token(mut self, token: impl Into<String>) -> Self {
+        self.metrics_auth_token = Some(token.into());
+        self
+    }
+
     /// Builds wired services and optionally starts HTTP.
     pub async fn build(self) -> Result<TestApp, String> {
         let db = if let Some(db) = self.db {
@@ -148,6 +164,8 @@ impl TestAppBuilder {
                 &self.database_url,
                 self.login_rate_limit_per_min,
                 self.transfer_rate_limit_per_min,
+                self.environment.as_deref(),
+                self.metrics_auth_token.as_deref(),
             );
             let (url, handle) = spawn_http_server(&config).await?;
             (Some(url), Some(handle))
@@ -220,6 +238,8 @@ fn test_app_config(
     database_url: &str,
     login_rate_limit_per_min: Option<u32>,
     transfer_rate_limit_per_min: Option<u32>,
+    environment: Option<&str>,
+    metrics_auth_token: Option<&str>,
 ) -> AppConfig {
     AppConfig {
         host: "127.0.0.1".into(),
@@ -228,12 +248,14 @@ fn test_app_config(
         migration_database_url: database_url.to_string(),
         jwt_secret: test_jwt_secret(),
         jwt_expiry_secs: 3600,
-        environment: "test".into(),
+        environment: environment.unwrap_or("test").to_string(),
         cors_origins: vec!["http://localhost".into()],
         login_rate_limit_per_min: login_rate_limit_per_min.unwrap_or(10_000),
         transfer_rate_limit_per_min: transfer_rate_limit_per_min.unwrap_or(10_000),
         otel_endpoint: None,
         otel_service_name: "ficus-api-test".into(),
+        metrics_auth_token: metrics_auth_token.map(str::to_string),
+        trust_proxy_headers: false,
     }
 }
 

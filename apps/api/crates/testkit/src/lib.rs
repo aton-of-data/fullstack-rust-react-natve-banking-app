@@ -13,7 +13,7 @@ pub use assertions::{
 };
 pub use http::{
     http_client, http_create_transfer, http_create_transfer_raw, http_get_balance, http_get_feed,
-    http_get_ledger, http_get_me, http_get_metrics, http_login, http_login_response, http_logout,
+    http_get_ledger, http_get_me, http_get_metrics, http_get_metrics_with_auth, http_login, http_login_response, http_logout,
     HttpJsonResponse, HttpTransferParams,
 };
 pub use seed::{seed_test_users, set_account_balance, TestUsers, SYSTEM_ACCOUNT_ID};
@@ -28,6 +28,9 @@ use tokio::sync::Mutex;
 
 static MIGRATION_LOCK: Mutex<()> = Mutex::const_new(());
 static TEST_ISOLATION_LOCK: Mutex<()> = Mutex::const_new(());
+
+/// Advisory lock key serializing truncate/seed across parallel test binaries.
+const TEST_ISOLATION_ADVISORY_LOCK: i64 = 0x4649_4355;
 
 /// Running PostgreSQL testcontainer with connection URL.
 pub struct PostgresFixture {
@@ -83,12 +86,32 @@ pub async fn run_migrations(database_url: &str) -> Result<DatabaseConnection, se
 
 /// Truncates application tables for isolated integration tests.
 pub async fn reset_test_database(db: &DatabaseConnection) -> Result<(), sea_orm::DbErr> {
+    reset_test_database_locked(db).await
+}
+
+async fn reset_test_database_locked(db: &DatabaseConnection) -> Result<(), sea_orm::DbErr> {
     let _guard = TEST_ISOLATION_LOCK.lock().await;
     db.execute(Statement::from_string(
         sea_orm::DatabaseBackend::Postgres,
-        "TRUNCATE TABLE audit_events, idempotency_requests, ledger_entries, transfers, account_balances, accounts, users RESTART IDENTITY CASCADE",
+        format!("SELECT pg_advisory_lock({TEST_ISOLATION_ADVISORY_LOCK})"),
     ))
     .await?;
+
+    let truncate = db
+        .execute(Statement::from_string(
+            sea_orm::DatabaseBackend::Postgres,
+            "TRUNCATE TABLE audit_events, idempotency_requests, ledger_entries, transfers, account_balances, accounts, users RESTART IDENTITY CASCADE",
+        ))
+        .await;
+
+    let _ = db
+        .execute(Statement::from_string(
+            sea_orm::DatabaseBackend::Postgres,
+            format!("SELECT pg_advisory_unlock({TEST_ISOLATION_ADVISORY_LOCK})"),
+        ))
+        .await;
+
+    truncate?;
     Ok(())
 }
 
@@ -99,12 +122,36 @@ pub async fn setup_isolated_test_db(
     let db = run_migrations(&pg.database_url)
         .await
         .map_err(|e| format!("migration failed: {e}"))?;
-    reset_test_database(&db)
+
+    let _guard = TEST_ISOLATION_LOCK.lock().await;
+    db.execute(Statement::from_string(
+        sea_orm::DatabaseBackend::Postgres,
+        format!("SELECT pg_advisory_lock({TEST_ISOLATION_ADVISORY_LOCK})"),
+    ))
+    .await
+    .map_err(|e| format!("isolation lock failed: {e}"))?;
+
+    let setup_result = async {
+        db.execute(Statement::from_string(
+            sea_orm::DatabaseBackend::Postgres,
+            "TRUNCATE TABLE audit_events, idempotency_requests, ledger_entries, transfers, account_balances, accounts, users RESTART IDENTITY CASCADE",
+        ))
         .await
         .map_err(|e| format!("reset failed: {e}"))?;
-    let users = seed_test_users(&db)
-        .await
-        .map_err(|e| format!("seed failed: {e}"))?;
+        seed_test_users(&db)
+            .await
+            .map_err(|e| format!("seed failed: {e}"))
+    }
+    .await;
+
+    let _ = db
+        .execute(Statement::from_string(
+            sea_orm::DatabaseBackend::Postgres,
+            format!("SELECT pg_advisory_unlock({TEST_ISOLATION_ADVISORY_LOCK})"),
+        ))
+        .await;
+
+    let users = setup_result?;
     Ok((pg, db, users))
 }
 

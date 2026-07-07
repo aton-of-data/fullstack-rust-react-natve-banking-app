@@ -1,0 +1,6 @@
+[profile.default]
+test-threads = 1
+
+[profile.ci]
+test-threads = 1
+retries = 0

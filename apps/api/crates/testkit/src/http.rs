@@ -254,15 +254,31 @@ pub async fn http_get_feed(
 
 /// Fetches Prometheus metrics via `GET /metrics`.
 pub async fn http_get_metrics(client: &Client, base_url: &str) -> Result<String, String> {
-    let response = client
-        .get(format!("{base_url}/metrics"))
+    http_get_metrics_with_auth(client, base_url, None)
+        .await
+        .map(|(_status, body)| body)
+}
+
+/// Fetches Prometheus metrics with an optional bearer token.
+pub async fn http_get_metrics_with_auth(
+    client: &Client,
+    base_url: &str,
+    bearer_token: Option<&str>,
+) -> Result<(reqwest::StatusCode, String), String> {
+    let mut request = client.get(format!("{base_url}/metrics"));
+    if let Some(token) = bearer_token {
+        request = request.bearer_auth(token);
+    }
+    let response = request
         .send()
         .await
         .map_err(|err| format!("metrics request failed: {err}"))?;
-    response
+    let status = response.status();
+    let text = response
         .text()
         .await
-        .map_err(|err| format!("metrics body read failed: {err}"))
+        .map_err(|err| format!("metrics body read failed: {err}"))?;
+    Ok((status, text))
 }
 
 /// Posts a raw JSON transfer body for validation contract tests.
