@@ -1,6 +1,7 @@
 # ADR-0001: Integer Money Representation
 
 ## Status
+
 Proposed
 
 ## Context
