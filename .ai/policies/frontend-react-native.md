@@ -31,16 +31,16 @@ src/
 
 ## State Management Rules
 
-| Rule | Detail |
-|------|--------|
-| Redux Toolkit only | Single store; feature slices colocated |
-| No custom Context | Except Redux Provider |
+| Rule               | Detail                                                                              |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| Redux Toolkit only | Single store; feature slices colocated                                              |
+| No custom Context  | Except Redux Provider                                                               |
 | No local app state | No `useState`/`useReducer` for app, page, form, workflow, loading, error, selection |
-| Pure reducers | No side effects in reducers |
-| Typed hooks | `useAppDispatch`, `useAppSelector` |
-| Selectors | Derived state via selectors, not duplicated in slices |
-| Entity adapters | For normalized collections when appropriate |
-| Page state | Feature slices keyed by route or entity ID |
+| Pure reducers      | No side effects in reducers                                                         |
+| Typed hooks        | `useAppDispatch`, `useAppSelector`                                                  |
+| Selectors          | Derived state via selectors, not duplicated in slices                               |
+| Entity adapters    | For normalized collections when appropriate                                         |
+| Page state         | Feature slices keyed by route or entity ID                                          |
 
 ## Side Effects
 
@@ -69,13 +69,13 @@ Each side effect must define: owner, trigger, success state, failure state, canc
 
 ## Atomic Design Rules
 
-| Level | Responsibility |
-|-------|----------------|
-| Atoms | Presentational, reusable |
-| Molecules | Compose atoms |
+| Level     | Responsibility                                |
+| --------- | --------------------------------------------- |
+| Atoms     | Presentational, reusable                      |
+| Molecules | Compose atoms                                 |
 | Organisms | Compose molecules; narrow feature adapters OK |
-| Templates | Page layout only |
-| Pages | Compose templates, widgets, features |
+| Templates | Page layout only                              |
+| Pages     | Compose templates, widgets, features          |
 
 Business rules do not belong in atoms, molecules, or templates.
 
@@ -91,11 +91,11 @@ Global transaction feed must update without manual refresh.
 
 Policy: `.ai/policies/frontend-tooling.md`. Templates: `.ai/templates/frontend-tooling/`.
 
-| Command | Enforces |
-|---------|----------|
-| `npm run lint` | ESLint + architectural rules + JSDoc |
-| `npm run format:check` | Prettier |
-| `npx commitlint` | Conventional Commits (commit-msg hook) |
+| Command                | Enforces                               |
+| ---------------------- | -------------------------------------- |
+| `npm run lint`         | ESLint + architectural rules + JSDoc   |
+| `npm run format:check` | Prettier                               |
+| `npx commitlint`       | Conventional Commits (commit-msg hook) |
 
 ## Lint Enforcement (Required When Scaffold Exists)
 

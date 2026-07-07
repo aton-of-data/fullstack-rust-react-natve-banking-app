@@ -6,21 +6,21 @@ Canonical reference: `context.md`
 
 Every change includes proportionate evidence:
 
-| Category | When required |
-|----------|---------------|
-| Type checking | Always (TS, Rust) |
-| **ESLint (`npm run lint`)** | Always (frontend) — includes JSDoc rules |
-| **Prettier (`npm run format:check`)** | Always (frontend) |
-| Formatting (Rust) | `cargo fmt --check` |
-| Linting (Rust) | `cargo clippy -D warnings` |
-| **JSDoc / rustdoc** | All new/changed exports |
-| Unit tests | Always for logic changes |
-| Integration tests | API, persistence, feature workflows |
-| Contract tests | Public API shape changes |
-| Regression tests | Bug fixes |
-| Accessibility | User-facing mobile UI |
-| Security review | Auth, secrets, validation, logging, dependencies |
-| Performance review | Lists, selectors, API caching, DB access, N+1 risk |
+| Category                              | When required                                      |
+| ------------------------------------- | -------------------------------------------------- |
+| Type checking                         | Always (TS, Rust)                                  |
+| **ESLint (`npm run lint`)**           | Always (frontend) — includes JSDoc rules           |
+| **Prettier (`npm run format:check`)** | Always (frontend)                                  |
+| Formatting (Rust)                     | `cargo fmt --check`                                |
+| Linting (Rust)                        | `cargo clippy -D warnings`                         |
+| **JSDoc / rustdoc**                   | All new/changed exports                            |
+| Unit tests                            | Always for logic changes                           |
+| Integration tests                     | API, persistence, feature workflows                |
+| Contract tests                        | Public API shape changes                           |
+| Regression tests                      | Bug fixes                                          |
+| Accessibility                         | User-facing mobile UI                              |
+| Security review                       | Auth, secrets, validation, logging, dependencies   |
+| Performance review                    | Lists, selectors, API caching, DB access, N+1 risk |
 
 ## QA Agent Obligations
 

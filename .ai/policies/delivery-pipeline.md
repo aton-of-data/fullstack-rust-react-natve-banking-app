@@ -68,12 +68,12 @@ docs/ai/work-items/<feature-id>/
 - Mermaid diagrams in feature docs where flows/architecture need visualization
 - `npm run lint` and `npm run format:check` pass (frontend, when scaffold exists)
 
-| Outcome | Action |
-|---------|--------|
-| PASS | Proceed to QA |
-| FAIL (missing exports/types to document) | Return to Implementation |
-| FAIL (doc-only gaps) | Documenter Agent continues |
-| BLOCKED | Return to Architecture |
+| Outcome                                  | Action                     |
+| ---------------------------------------- | -------------------------- |
+| PASS                                     | Proceed to QA              |
+| FAIL (missing exports/types to document) | Return to Implementation   |
+| FAIL (doc-only gaps)                     | Documenter Agent continues |
+| BLOCKED                                  | Return to Architecture     |
 
 ### 4. Quality Assurance
 
@@ -85,11 +85,11 @@ docs/ai/work-items/<feature-id>/
 - Every acceptance criterion validated with evidence
 - Lint, prettier, typecheck, tests executed; outputs referenced
 
-| Outcome | Action |
-|---------|--------|
-| PASS | Proceed to Code Review |
-| FAIL | Return to Implementation |
-| BLOCKED | Return to Architecture |
+| Outcome | Action                   |
+| ------- | ------------------------ |
+| PASS    | Proceed to Code Review   |
+| FAIL    | Return to Implementation |
+| BLOCKED | Return to Architecture   |
 
 ### 5. Code Review
 
@@ -100,12 +100,12 @@ docs/ai/work-items/<feature-id>/
 - `05-code-review.md` with `APPROVED`, `CHANGES_REQUESTED`, or `BLOCKED`
 - Independent review of correctness, security, architecture, **documentation quality**
 
-| Outcome | Action |
-|---------|--------|
-| APPROVED | Proceed to Commit (if authorized) |
-| CHANGES_REQUESTED (code) | Return to Implementation |
-| CHANGES_REQUESTED (docs) | Return to Documenter |
-| BLOCKED | Return to Architecture |
+| Outcome                  | Action                            |
+| ------------------------ | --------------------------------- |
+| APPROVED                 | Proceed to Commit (if authorized) |
+| CHANGES_REQUESTED (code) | Return to Implementation          |
+| CHANGES_REQUESTED (docs) | Return to Documenter              |
+| BLOCKED                  | Return to Architecture            |
 
 ### 6. Commit
 

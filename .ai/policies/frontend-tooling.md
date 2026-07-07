@@ -4,13 +4,13 @@ Canonical reference: `context.md`
 
 ## Required Tooling
 
-| Tool | Config location | Enforced by |
-|------|-----------------|-------------|
-| ESLint | `frontend/eslint.config.mjs` | `npm run lint` |
-| Prettier | `frontend/prettier.config.mjs` | `npm run format:check` |
-| eslint-plugin-jsdoc | in ESLint config | `npm run lint` |
-| commitlint | `commitlint.config.cjs` (repo root) | Husky `commit-msg` hook |
-| Husky | `frontend/package.json` or repo root | git hooks |
+| Tool                | Config location                      | Enforced by             |
+| ------------------- | ------------------------------------ | ----------------------- |
+| ESLint              | `frontend/eslint.config.mjs`         | `npm run lint`          |
+| Prettier            | `frontend/prettier.config.mjs`       | `npm run format:check`  |
+| eslint-plugin-jsdoc | in ESLint config                     | `npm run lint`          |
+| commitlint          | `commitlint.config.cjs` (repo root)  | Husky `commit-msg` hook |
+| Husky               | `frontend/package.json` or repo root | git hooks               |
 
 Bootstrap templates: `.ai/templates/frontend-tooling/`
 
@@ -42,14 +42,14 @@ Prohibit direct usage of:
 
 ### JSDoc rules (via eslint-plugin-jsdoc)
 
-| Rule | Level | Applies to |
-|------|-------|------------|
-| `jsdoc/require-jsdoc` | error | exported functions, classes, types, interfaces |
-| `jsdoc/require-description` | error | all JSDoc blocks |
-| `jsdoc/require-param` | error | functions with parameters |
-| `jsdoc/require-returns` | error | functions with non-void return |
-| `jsdoc/check-types` | error | `@param` and `@returns` types |
-| `jsdoc/valid-types` | error | TypeScript-compatible JSDoc types |
+| Rule                        | Level | Applies to                                     |
+| --------------------------- | ----- | ---------------------------------------------- |
+| `jsdoc/require-jsdoc`       | error | exported functions, classes, types, interfaces |
+| `jsdoc/require-description` | error | all JSDoc blocks                               |
+| `jsdoc/require-param`       | error | functions with parameters                      |
+| `jsdoc/require-returns`     | error | functions with non-void return                 |
+| `jsdoc/check-types`         | error | `@param` and `@returns` types                  |
+| `jsdoc/valid-types`         | error | TypeScript-compatible JSDoc types              |
 
 ### Exemptions
 

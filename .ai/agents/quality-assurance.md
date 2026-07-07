@@ -31,20 +31,20 @@ Use template: `.ai/templates/qa-report.md`
 
 ## Outcomes (Only These)
 
-| Outcome | Meaning | Next step |
-|---------|---------|-----------|
-| `PASS` | All criteria met, gates green | Code Reviewer Agent |
-| `FAIL` | Defects or failed checks | Implementation Agent |
-| `BLOCKED` | Architectural ambiguity or missing decision | Architecture Agent |
+| Outcome   | Meaning                                     | Next step            |
+| --------- | ------------------------------------------- | -------------------- |
+| `PASS`    | All criteria met, gates green               | Code Reviewer Agent  |
+| `FAIL`    | Defects or failed checks                    | Implementation Agent |
+| `BLOCKED` | Architectural ambiguity or missing decision | Architecture Agent   |
 
 ## Frontend Tooling Gates (Required When Scaffold Exists)
 
-| Command | Must pass |
-|---------|-----------|
-| `npm run lint` | Yes — includes JSDoc rules |
-| `npm run format:check` | Yes — Prettier |
-| `npm run typecheck` | Yes |
-| `npm test` | Yes |
+| Command                | Must pass                  |
+| ---------------------- | -------------------------- |
+| `npm run lint`         | Yes — includes JSDoc rules |
+| `npm run format:check` | Yes — Prettier             |
+| `npm run typecheck`    | Yes                        |
+| `npm test`             | Yes                        |
 
 ## Forbidden
 

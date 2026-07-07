@@ -12,16 +12,17 @@ Every feature, bug fix, refactor, migration, and architectural change flows thro
 Architecture → Implementation → Documentation → QA → Code Review → Commit
 ```
 
-| Stage | Agent | Output |
-|-------|-------|--------|
-| 1 | Architecture Agent | `docs/ai/work-items/<id>/01-architecture.md` |
-| 2 | Implementation Agent | `docs/ai/work-items/<id>/02-implementation.md` |
-| 3 | Documenter Agent | `docs/ai/work-items/<id>/03-documentation.md` |
-| 4 | Quality Assurance Agent | `docs/ai/work-items/<id>/04-qa-report.md` |
-| 5 | Code Reviewer Agent | `docs/ai/work-items/<id>/05-code-review.md` |
-| 6 | Committer Agent | `docs/ai/work-items/<id>/06-commit-report.md` |
+| Stage | Agent                   | Output                                         |
+| ----- | ----------------------- | ---------------------------------------------- |
+| 1     | Architecture Agent      | `docs/ai/work-items/<id>/01-architecture.md`   |
+| 2     | Implementation Agent    | `docs/ai/work-items/<id>/02-implementation.md` |
+| 3     | Documenter Agent        | `docs/ai/work-items/<id>/03-documentation.md`  |
+| 4     | Quality Assurance Agent | `docs/ai/work-items/<id>/04-qa-report.md`      |
+| 5     | Code Reviewer Agent     | `docs/ai/work-items/<id>/05-code-review.md`    |
+| 6     | Committer Agent         | `docs/ai/work-items/<id>/06-commit-report.md`  |
 
 **Gate rules:**
+
 - Documentation: `PASS` → QA; `FAIL` (code) → Implementation; `FAIL` (docs) → Documenter; `BLOCKED` → Architecture
 - QA: `PASS` → Review; `FAIL` → Implementation; `BLOCKED` → Architecture
 - Review: `APPROVED` → Commit; `CHANGES_REQUESTED` → Implementation or Documenter; `BLOCKED` → Architecture
@@ -40,20 +41,20 @@ Architecture → Implementation → Documentation → QA → Code Review → Com
 
 ## Enforced Tooling
 
-| Tool | Command | Purpose |
-|------|---------|---------|
-| ESLint | `npm run lint` | Lint + JSDoc rules |
-| Prettier | `npm run format:check` | Formatting |
-| commitlint | `npx commitlint` | Conventional Commits |
+| Tool       | Command                | Purpose              |
+| ---------- | ---------------------- | -------------------- |
+| ESLint     | `npm run lint`         | Lint + JSDoc rules   |
+| Prettier   | `npm run format:check` | Formatting           |
+| commitlint | `npx commitlint`       | Conventional Commits |
 
 Config: `commitlint.config.cjs`. Templates: `.ai/templates/frontend-tooling/`.
 
 ## Stack
 
-| Layer | Technology |
-|-------|------------|
+| Layer    | Technology                                                            |
+| -------- | --------------------------------------------------------------------- |
 | Frontend | React Native, Redux Toolkit, RTK Query, Atomic Design, JSDoc, Mermaid |
-| Backend | Rust (Tokio, Axum, PostgreSQL, SeaORM), rustdoc |
+| Backend  | Rust (Tokio, Axum, PostgreSQL, SeaORM), rustdoc                       |
 
 ## Key Prohibitions
 
@@ -65,15 +66,15 @@ Config: `commitlint.config.cjs`. Templates: `.ai/templates/frontend-tooling/`.
 
 ## Where to Read More
 
-| Topic | Path |
-|-------|------|
-| Canonical context | `context.md` |
-| Machine manifest | `.ai/manifest.yml` |
-| Documenter Agent | `.ai/agents/documenter.md` |
-| Documentation policy | `.ai/policies/documentation.md` |
-| Frontend tooling | `.ai/policies/frontend-tooling.md` |
-| JSDoc + Mermaid skill | `.ai/skills/jsdoc-and-mermaid.md` |
-| Conventional Commits | `.ai/skills/conventional-commits.md` |
+| Topic                 | Path                                 |
+| --------------------- | ------------------------------------ |
+| Canonical context     | `context.md`                         |
+| Machine manifest      | `.ai/manifest.yml`                   |
+| Documenter Agent      | `.ai/agents/documenter.md`           |
+| Documentation policy  | `.ai/policies/documentation.md`      |
+| Frontend tooling      | `.ai/policies/frontend-tooling.md`   |
+| JSDoc + Mermaid skill | `.ai/skills/jsdoc-and-mermaid.md`    |
+| Conventional Commits  | `.ai/skills/conventional-commits.md` |
 
 ## Starting a New Change
 

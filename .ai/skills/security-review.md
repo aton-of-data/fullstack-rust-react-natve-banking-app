@@ -54,6 +54,7 @@ Document in `03-qa-report.md` or `04-code-review.md`:
 
 ```markdown
 ## Security Review
+
 - **Scope:** ...
 - **Findings:** None | List with severity
 - **Status:** PASS | FAIL

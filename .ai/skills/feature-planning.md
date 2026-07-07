@@ -7,6 +7,7 @@ Use during Architecture stage to structure a work item.
 1. **Assign feature ID** — kebab-case (e.g., `auth-login`, `feed-realtime`)
 
 2. **Create work item directory**
+
    ```text
    docs/ai/work-items/<feature-id>/
    ```
@@ -22,6 +23,7 @@ Use during Architecture stage to structure a work item.
 5. **Acceptance criteria** — testable, numbered
 
    Example:
+
    ```text
    AC-1: User can log in with valid username/password
    AC-2: Invalid credentials return error without leaking which field failed
@@ -30,9 +32,9 @@ Use during Architecture stage to structure a work item.
 
 6. **Test matrix**
 
-   | AC | Unit | Integration | E2E | Manual |
-   |----|------|-------------|-----|--------|
-   | AC-1 | | ✓ | | |
+   | AC   | Unit | Integration | E2E | Manual |
+   | ---- | ---- | ----------- | --- | ------ |
+   | AC-1 |      | ✓           |     |        |
 
 7. **Identify ADR needs** — see `.ai/skills/architecture-decision-record.md`
 

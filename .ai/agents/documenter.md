@@ -35,11 +35,11 @@ Use template: `.ai/templates/documentation-handoff.md`
 
 ## Outcomes (Only These)
 
-| Outcome | Meaning | Next step |
-|---------|---------|-----------|
-| `PASS` | Docs complete, lint/format pass | QA Agent |
-| `FAIL` | Missing code exports/types to document | Implementation Agent |
-| `BLOCKED` | Architectural ambiguity | Architecture Agent |
+| Outcome   | Meaning                                | Next step            |
+| --------- | -------------------------------------- | -------------------- |
+| `PASS`    | Docs complete, lint/format pass        | QA Agent             |
+| `FAIL`    | Missing code exports/types to document | Implementation Agent |
+| `BLOCKED` | Architectural ambiguity                | Architecture Agent   |
 
 Doc-only gaps are fixed by Documenter without returning to Implementation.
 

@@ -42,7 +42,9 @@ Define: trigger action, effect, cleanup on cancel.
 const [loading, setLoading] = useState(false);
 
 // ❌ Side effect in reducer
-someSlice.reducers.charge = (state) => { fetch('/api'); };
+someSlice.reducers.charge = (state) => {
+  fetch("/api");
+};
 
 // ✅ RTK Query or listener for side effects
 ```

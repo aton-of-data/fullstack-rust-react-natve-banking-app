@@ -29,12 +29,12 @@ Use template: `.ai/templates/code-review-report.md`
 
 ## Outcomes (Only These)
 
-| Outcome | Meaning | Next step |
-|---------|---------|-----------|
-| `APPROVED` | Ready for commit (if authorized) | Committer Agent |
-| `CHANGES_REQUESTED` (code) | Fixable code issues | Implementation Agent |
-| `CHANGES_REQUESTED` (docs) | JSDoc/Mermaid gaps | Documenter Agent |
-| `BLOCKED` | Architectural or policy violation | Architecture Agent |
+| Outcome                    | Meaning                           | Next step            |
+| -------------------------- | --------------------------------- | -------------------- |
+| `APPROVED`                 | Ready for commit (if authorized)  | Committer Agent      |
+| `CHANGES_REQUESTED` (code) | Fixable code issues               | Implementation Agent |
+| `CHANGES_REQUESTED` (docs) | JSDoc/Mermaid gaps                | Documenter Agent     |
+| `BLOCKED`                  | Architectural or policy violation | Architecture Agent   |
 
 ## Review Checklist
 

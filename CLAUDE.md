@@ -20,14 +20,14 @@ Money transfer and balance tracking app (Venmo-like). **React Native** frontend,
 
 ## Agent Roles
 
-| Agent | Artifact | Read |
-|-------|----------|------|
-| Architecture | `01-architecture.md` | `.ai/agents/architecture.md` |
-| Implementation | `02-implementation.md` | `.ai/agents/implementation.md` |
-| Documenter | `03-documentation.md` | `.ai/agents/documenter.md` |
-| QA | `04-qa-report.md` | `.ai/agents/quality-assurance.md` |
-| Code Review | `05-code-review.md` | `.ai/agents/code-reviewer.md` |
-| Committer | `06-commit-report.md` | `.ai/agents/committer.md` |
+| Agent          | Artifact               | Read                              |
+| -------------- | ---------------------- | --------------------------------- |
+| Architecture   | `01-architecture.md`   | `.ai/agents/architecture.md`      |
+| Implementation | `02-implementation.md` | `.ai/agents/implementation.md`    |
+| Documenter     | `03-documentation.md`  | `.ai/agents/documenter.md`        |
+| QA             | `04-qa-report.md`      | `.ai/agents/quality-assurance.md` |
+| Code Review    | `05-code-review.md`    | `.ai/agents/code-reviewer.md`     |
+| Committer      | `06-commit-report.md`  | `.ai/agents/committer.md`         |
 
 Manifest: `.ai/manifest.yml`
 

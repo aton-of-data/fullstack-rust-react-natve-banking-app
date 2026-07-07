@@ -27,28 +27,36 @@ docs/ai/adr/NNNN-short-title.md
 # ADR-NNNN: Title
 
 ## Status
+
 Proposed | Accepted | Deprecated | Superseded by ADR-XXXX
 
 ## Context
+
 What is the issue? What forces are at play?
 
 ## Decision
+
 What we decided.
 
 ## Alternatives Considered
+
 - Option A — pros/cons
 - Option B — pros/cons
 
 ## Consequences
+
 Positive and negative outcomes.
 
 ## Migration Plan
+
 How to adopt; steps for existing code/data.
 
 ## Rollback Plan
+
 How to revert if decision fails.
 
 ## Approval Status
+
 - Architecture Agent: ...
 - Human reviewer (if required): ...
 ```

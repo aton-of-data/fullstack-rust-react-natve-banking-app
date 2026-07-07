@@ -12,13 +12,13 @@ Canonical reference: `context.md`
 
 ## Architectural Ownership
 
-| Layer | Owns |
-|-------|------|
-| `domain` (Rust) | Business rules, invariants, money math |
-| `application` | Use cases, orchestration, ports |
+| Layer            | Owns                                           |
+| ---------------- | ---------------------------------------------- |
+| `domain` (Rust)  | Business rules, invariants, money math         |
+| `application`    | Use cases, orchestration, ports                |
 | `features/` (RN) | Feature slices, RTK Query endpoints, selectors |
-| `shared/ui/` | Presentational atoms, molecules, organisms |
-| `pages/` | Route composition only |
+| `shared/ui/`     | Presentational atoms, molecules, organisms     |
+| `pages/`         | Route composition only                         |
 
 ## Money Domain Rules
 

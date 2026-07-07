@@ -4,12 +4,12 @@ Canonical reference: `context.md`
 
 ## Ownership
 
-| Content | Owner Agent |
-|---------|-------------|
-| Architecture docs, ADRs, Mermaid system diagrams | Architecture Agent |
-| JSDoc, module READMEs, feature flow diagrams | Documenter Agent |
-| rustdoc (`///`) on public Rust APIs | Documenter Agent (backend changes) |
-| Inline code comments (non-obvious logic only) | Implementation Agent |
+| Content                                          | Owner Agent                        |
+| ------------------------------------------------ | ---------------------------------- |
+| Architecture docs, ADRs, Mermaid system diagrams | Architecture Agent                 |
+| JSDoc, module READMEs, feature flow diagrams     | Documenter Agent                   |
+| rustdoc (`///`) on public Rust APIs              | Documenter Agent (backend changes) |
+| Inline code comments (non-obvious logic only)    | Implementation Agent               |
 
 ## Documenter Agent Gate
 
@@ -39,7 +39,9 @@ Must pass before QA.
  * @example
  * await sendTransfer({ toUsername: 'alice', amountMinor: 1500, idempotencyKey: '...' });
  */
-export async function sendTransfer(request: SendTransferRequest): Promise<Transfer> {}
+export async function sendTransfer(
+  request: SendTransferRequest,
+): Promise<Transfer> {}
 ```
 
 ### Type annotations
@@ -65,13 +67,13 @@ Use Mermaid in:
 
 ### Supported diagram types
 
-| Type | Use for |
-|------|---------|
-| `flowchart` | Decision flows, pipeline, navigation |
-| `sequenceDiagram` | API calls, transfer lifecycle, auth |
-| `stateDiagram-v2` | Transfer states, session states |
-| `erDiagram` | Data model (ADR/schema docs) |
-| `classDiagram` | Type relationships (sparingly) |
+| Type              | Use for                              |
+| ----------------- | ------------------------------------ |
+| `flowchart`       | Decision flows, pipeline, navigation |
+| `sequenceDiagram` | API calls, transfer lifecycle, auth  |
+| `stateDiagram-v2` | Transfer states, session states      |
+| `erDiagram`       | Data model (ADR/schema docs)         |
+| `classDiagram`    | Type relationships (sparingly)       |
 
 ### Example (sequence)
 

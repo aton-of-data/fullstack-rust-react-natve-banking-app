@@ -107,6 +107,9 @@ skills:
   testing_and_verification: .ai/skills/testing-and-verification.md
   security_review: .ai/skills/security-review.md
   git_commit: .ai/skills/git-commit.md
+  rust_financial_ledger: .ai/skills/rust-financial-ledger.md
+  observability: .ai/skills/observability.md
+  performance_testing: .ai/skills/performance-testing.md
 
 templates:
   feature_work_item: .ai/templates/feature-work-item.md

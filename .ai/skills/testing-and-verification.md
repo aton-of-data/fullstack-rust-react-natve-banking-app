@@ -31,6 +31,7 @@ cargo nextest run        # if configured
 
 ```markdown
 ### Verification: <name>
+
 - **Command:** `cargo test transfer_concurrent`
 - **Exit code:** 0
 - **Summary:** 100 concurrent transfers; balance never negative; conservation holds
@@ -38,18 +39,19 @@ cargo nextest run        # if configured
 
 ## QA Checklist by Change Type
 
-| Change | Minimum tests |
-|--------|---------------|
-| Transfer/money | Concurrent + idempotency + conservation |
-| Auth | Invalid creds, missing token, expired session |
-| Feed | New item appears without refresh |
-| API contract | Contract test or OpenAPI snapshot |
-| Migration | Up/down or fresh install |
+| Change         | Minimum tests                                 |
+| -------------- | --------------------------------------------- |
+| Transfer/money | Concurrent + idempotency + conservation       |
+| Auth           | Invalid creds, missing token, expired session |
+| Feed           | New item appears without refresh              |
+| API contract   | Contract test or OpenAPI snapshot             |
+| Migration      | Up/down or fresh install                      |
 
 ## Failure Reporting
 
 ```markdown
 ### Failure: <AC-id>
+
 - **Expected:** ...
 - **Actual:** ...
 - **Reproduce:** `command` or steps

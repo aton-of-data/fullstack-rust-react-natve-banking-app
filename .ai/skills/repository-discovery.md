@@ -9,6 +9,7 @@ Use at the start of Architecture stage or when onboarding to the codebase.
    - `.ai/manifest.yml`
 
 2. **Map repository layout**
+
    ```bash
    find . -maxdepth 3 -type f \( -name "package.json" -o -name "Cargo.toml" -o -name "*.md" \) | head -50
    ls -la frontend/ backend/ src/ 2>/dev/null || true

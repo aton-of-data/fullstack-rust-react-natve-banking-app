@@ -13,6 +13,7 @@ ls docs/ai/work-items/<feature-id>/
 ```
 
 Confirm outcomes:
+
 - Documentation: `PASS`
 - QA: `PASS`
 - Review: `APPROVED`
@@ -27,6 +28,7 @@ git diff --staged
 ```
 
 Reject if:
+
 - Secrets (`.env`, keys, tokens)
 - Debug `console.log` / `dbg!` left intentionally
 - Unrelated files

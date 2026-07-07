@@ -4,20 +4,20 @@ Canonical reference: `context.md`
 
 ## Default Stack
 
-| Concern | Choice |
-|---------|--------|
-| Runtime | Tokio |
-| HTTP | Axum |
-| Middleware | Tower, tower-http |
-| Serialization | Serde |
-| Validation | validator or typed boundary validation |
-| Database | PostgreSQL |
-| ORM | SeaORM (or repo-approved equivalent) |
-| Migrations | ORM-native tooling |
-| Observability | tracing, tracing-subscriber, OpenTelemetry as needed |
-| OpenAPI | utoipa or equivalent |
-| Errors | thiserror (domain/library) |
-| Testing | cargo test, nextest, rstest, testcontainers, wiremock, proptest |
+| Concern       | Choice                                                          |
+| ------------- | --------------------------------------------------------------- |
+| Runtime       | Tokio                                                           |
+| HTTP          | Axum                                                            |
+| Middleware    | Tower, tower-http                                               |
+| Serialization | Serde                                                           |
+| Validation    | validator or typed boundary validation                          |
+| Database      | PostgreSQL                                                      |
+| ORM           | SeaORM (or repo-approved equivalent)                            |
+| Migrations    | ORM-native tooling                                              |
+| Observability | tracing, tracing-subscriber, OpenTelemetry as needed            |
+| OpenAPI       | utoipa or equivalent                                            |
+| Errors        | thiserror (domain/library)                                      |
+| Testing       | cargo test, nextest, rstest, testcontainers, wiremock, proptest |
 
 Verify crate versions from official docs before adding. Pin via `Cargo.lock`.
 
@@ -42,14 +42,14 @@ backend/
 domain ← application ← adapters & infrastructure ← composition root (binary)
 ```
 
-| Crate | May depend on | Must not depend on |
-|-------|---------------|-------------------|
-| domain | std, pure libs | HTTP, ORM, Axum, env |
-| application | domain | framework details in domain rules |
-| contracts | serde types | ORM entities |
-| adapters-http | application, contracts | business logic in handlers |
-| adapters-persistence | application, domain (via mapping) | leaking ORM to domain |
-| infrastructure | application ports | domain rule violations |
+| Crate                | May depend on                     | Must not depend on                |
+| -------------------- | --------------------------------- | --------------------------------- |
+| domain               | std, pure libs                    | HTTP, ORM, Axum, env              |
+| application          | domain                            | framework details in domain rules |
+| contracts            | serde types                       | ORM entities                      |
+| adapters-http        | application, contracts            | business logic in handlers        |
+| adapters-persistence | application, domain (via mapping) | leaking ORM to domain             |
+| infrastructure       | application ports                 | domain rule violations            |
 
 ## API Design
 

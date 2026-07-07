@@ -14,19 +14,19 @@ Work-Item: <feature-id>
 
 ## Types
 
-| Type | When |
-|------|------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
-| `style` | Formatting (no logic change) |
+| Type       | When                         |
+| ---------- | ---------------------------- |
+| `feat`     | New feature                  |
+| `fix`      | Bug fix                      |
+| `docs`     | Documentation only           |
+| `style`    | Formatting (no logic change) |
 | `refactor` | Code change without feat/fix |
-| `perf` | Performance improvement |
-| `test` | Tests only |
-| `build` | Build system, dependencies |
-| `ci` | CI configuration |
-| `chore` | Maintenance |
-| `revert` | Revert prior commit |
+| `perf`     | Performance improvement      |
+| `test`     | Tests only                   |
+| `build`    | Build system, dependencies   |
+| `ci`       | CI configuration             |
+| `chore`    | Maintenance                  |
+| `revert`   | Revert prior commit          |
 
 ## Scopes (examples)
 

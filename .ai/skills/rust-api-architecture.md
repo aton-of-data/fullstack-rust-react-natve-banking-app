@@ -2,15 +2,15 @@
 
 ## Crate Responsibilities
 
-| Crate | Contents |
-|-------|----------|
-| `domain` | `Money`, `Account`, `Transfer`, invariants, domain errors |
-| `application` | `SendTransfer`, `GetFeed`, ports, unit-of-work |
-| `contracts` | HTTP request/response DTOs, OpenAPI schemas |
-| `adapters-http` | Axum routes, extractors, status mapping |
-| `adapters-persistence` | SeaORM entities, repos, migrations |
-| `infrastructure` | Config, DB pool, tracing, auth middleware |
-| `testkit` | Fixtures, test DB helpers |
+| Crate                  | Contents                                                  |
+| ---------------------- | --------------------------------------------------------- |
+| `domain`               | `Money`, `Account`, `Transfer`, invariants, domain errors |
+| `application`          | `SendTransfer`, `GetFeed`, ports, unit-of-work            |
+| `contracts`            | HTTP request/response DTOs, OpenAPI schemas               |
+| `adapters-http`        | Axum routes, extractors, status mapping                   |
+| `adapters-persistence` | SeaORM entities, repos, migrations                        |
+| `infrastructure`       | Config, DB pool, tracing, auth middleware                 |
+| `testkit`              | Fixtures, test DB helpers                                 |
 
 ## Handler Pattern (Thin)
 

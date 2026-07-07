@@ -5,6 +5,7 @@ Use during Documentation stage.
 ## JSDoc Workflow
 
 1. **Inventory exports** in changed files:
+
    ```bash
    # After frontend scaffold exists
    git diff --name-only | grep -E '\.(ts|tsx)$'
@@ -18,6 +19,7 @@ Use during Documentation stage.
    - `@example` for non-obvious usage (RTK mutations, hooks)
 
 3. **RTK Query endpoints:**
+
    ```typescript
    /**
     * Creates a money transfer between users.
@@ -28,6 +30,7 @@ Use during Documentation stage.
    ```
 
 4. **Redux slices:**
+
    ```typescript
    /**
     * Feature slice owning send-money workflow state keyed by draft ID.
@@ -77,19 +80,19 @@ Record exit codes in `03-documentation.md`.
 
 ## Coverage Checklist
 
-| Area | JSDoc | Mermaid |
-|------|-------|---------|
-| New exports | Required | If flow is non-trivial |
-| RTK endpoints | Required | Sequence diagram recommended |
-| Feature slice public API | Required | State diagram if complex |
-| Page components | Required | Optional |
-| Atoms/molecules | Required on export | Rare |
+| Area                     | JSDoc              | Mermaid                      |
+| ------------------------ | ------------------ | ---------------------------- |
+| New exports              | Required           | If flow is non-trivial       |
+| RTK endpoints            | Required           | Sequence diagram recommended |
+| Feature slice public API | Required           | State diagram if complex     |
+| Page components          | Required           | Optional                     |
+| Atoms/molecules          | Required on export | Rare                         |
 
 ## Common Failures
 
-| Issue | Fix |
-|-------|-----|
-| `jsdoc/require-jsdoc` | Add block above export |
-| `jsdoc/require-param` | Document all params |
-| Missing `@returns` | Add for non-void functions |
-| Stale Mermaid | Update diagram to match code |
+| Issue                 | Fix                          |
+| --------------------- | ---------------------------- |
+| `jsdoc/require-jsdoc` | Add block above export       |
+| `jsdoc/require-param` | Document all params          |
+| Missing `@returns`    | Add for non-void functions   |
+| Stale Mermaid         | Update diagram to match code |

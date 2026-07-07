@@ -1,0 +1,74 @@
+---
+description: Quality, security, CI, and infrastructure rules
+alwaysApply: true
+---
+
+# Quality, Security, and Infrastructure
+
+Complements `.cursor/rules/40-quality-security-git.mdc` (git/commit rules).
+
+Policies: `.ai/policies/quality-and-security.md`
+
+## CI Workflows
+
+| Workflow | File | Purpose |
+|----------|------|---------|
+| CI | `.github/workflows/ci.yml` | Lint, test, typecheck, Rust gates, commitlint |
+| Security | `.github/workflows/security.yml` | gitleaks, cargo audit, trivy |
+| Quality | `.github/workflows/quality.yml` | Coverage, k6 smoke, docs structure |
+
+Never mark QA PASS without matching CI command evidence.
+
+## Local Verification
+
+```bash
+# Frontend
+pnpm format:check && pnpm lint && pnpm typecheck && pnpm test
+
+# Backend
+make api-lint && make api-test
+
+# Security (graceful skip if tools missing)
+pnpm security:scan
+
+# Performance (requires k6)
+pnpm test:performance
+```
+
+## Security Scanning
+
+- **gitleaks** — secret detection in repo history
+- **trivy** — container and config vulnerability scan
+- Wrapper: `scripts/security-scan.mjs` skips missing tools locally; CI uses native actions
+
+Security review triggers: auth, passwords, tokens, transfers, validation, logging, dependencies.
+
+Skill: `.ai/skills/security-review.md`
+
+## Infrastructure
+
+| Path | Purpose |
+|------|---------|
+| `docker-compose.yml` | Postgres, API, observability profiles |
+| `infra/docker/` | API container build |
+| `infra/otel/`, `infra/prometheus/`, `infra/loki/`, `infra/grafana/` | Observability |
+| `Makefile` | DB migrate/seed, api-dev, api-test |
+
+Observability skill: `.ai/skills/observability.md`
+
+## Performance Testing
+
+- k6 scripts: `scripts/performance/`
+- Runner: `node scripts/performance/run-k6.mjs`
+- Skill: `.ai/skills/performance-testing.md`
+
+## Prohibited
+
+- Claiming CI pass without executed commands
+- Skipping security review on money/auth changes
+- Committing secrets (use `.env` locally, never in git)
+- `--no-verify` on commits
+
+## ADRs
+
+Infrastructure and cross-cutting changes require ADRs under `docs/ai/adr/`.

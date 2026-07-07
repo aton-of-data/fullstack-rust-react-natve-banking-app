@@ -52,10 +52,10 @@ Automated tests for money movement logic are required.
 
 ### Tech Stack
 
-| Layer    | Choice              |
-|----------|---------------------|
-| Frontend | Pure React Native   |
-| Backend  | Rust                |
+| Layer    | Choice            |
+| -------- | ----------------- |
+| Frontend | Pure React Native |
+| Backend  | Rust              |
 
 ---
 
@@ -80,14 +80,14 @@ Automated tests for money movement logic are required.
 Architecture → Implementation → Documentation → QA → Code Review → Commit
 ```
 
-| Stage            | Agent              | Output Artifact                                      |
-|------------------|--------------------|------------------------------------------------------|
-| Architecture     | Architecture Agent | `docs/ai/work-items/<id>/01-architecture.md`         |
-| Implementation   | Implementation Agent | `docs/ai/work-items/<id>/02-implementation.md`   |
-| Documentation    | Documenter Agent   | `docs/ai/work-items/<id>/03-documentation.md`        |
-| Quality Assurance| QA Agent           | `docs/ai/work-items/<id>/04-qa-report.md`            |
-| Code Review      | Code Reviewer Agent| `docs/ai/work-items/<id>/05-code-review.md`        |
-| Commit           | Committer Agent    | `docs/ai/work-items/<id>/06-commit-report.md`      |
+| Stage             | Agent                | Output Artifact                                |
+| ----------------- | -------------------- | ---------------------------------------------- |
+| Architecture      | Architecture Agent   | `docs/ai/work-items/<id>/01-architecture.md`   |
+| Implementation    | Implementation Agent | `docs/ai/work-items/<id>/02-implementation.md` |
+| Documentation     | Documenter Agent     | `docs/ai/work-items/<id>/03-documentation.md`  |
+| Quality Assurance | QA Agent             | `docs/ai/work-items/<id>/04-qa-report.md`      |
+| Code Review       | Code Reviewer Agent  | `docs/ai/work-items/<id>/05-code-review.md`    |
+| Commit            | Committer Agent      | `docs/ai/work-items/<id>/06-commit-report.md`  |
 
 **Gate outcomes:**
 
@@ -99,12 +99,12 @@ No agent may skip, reorder, or self-approve a required stage.
 
 ### Frontend Tooling (Enforced)
 
-| Tool | Purpose | Gate command |
-|------|---------|--------------|
-| ESLint | Lint + architectural restrictions + JSDoc rules | `npm run lint` |
-| Prettier | Consistent formatting | `npm run format:check` |
-| eslint-plugin-jsdoc | JSDoc completeness and validity | included in `npm run lint` |
-| commitlint | Conventional Commits enforcement | `npx commitlint --edit` (commit-msg hook) |
+| Tool                | Purpose                                         | Gate command                              |
+| ------------------- | ----------------------------------------------- | ----------------------------------------- |
+| ESLint              | Lint + architectural restrictions + JSDoc rules | `npm run lint`                            |
+| Prettier            | Consistent formatting                           | `npm run format:check`                    |
+| eslint-plugin-jsdoc | JSDoc completeness and validity                 | included in `npm run lint`                |
+| commitlint          | Conventional Commits enforcement                | `npx commitlint --edit` (commit-msg hook) |
 
 Policy: `.ai/policies/frontend-tooling.md`. Templates: `.ai/templates/frontend-tooling/`.
 
@@ -155,21 +155,21 @@ Every change includes proportionate verification: typecheck, **lint**, **prettie
 
 ### Governance File Map
 
-| Path | Purpose |
-|------|---------|
-| `context.md` | Canonical source (this file) |
-| `CLAUDE.md` | Claude Code / Opus entry point |
-| `AGENTS.md` | Model-agnostic agent entry point |
-| `.ai/manifest.yml` | Machine-readable pipeline manifest |
-| `.ai/policies/` | Detailed policy documents |
-| `.ai/agents/` | Per-agent contracts |
-| `.ai/skills/` | Reusable skill playbooks |
-| `.ai/templates/` | Handoff and report templates |
-| `.cursor/rules/` | Cursor IDE rules |
-| `.github/copilot-instructions.md` | GitHub Copilot instructions |
-| `commitlint.config.cjs` | Conventional Commits schema |
-| `docs/ai/work-items/` | Per-feature pipeline artifacts |
-| `docs/ai/adr/` | Architecture Decision Records |
+| Path                              | Purpose                            |
+| --------------------------------- | ---------------------------------- |
+| `context.md`                      | Canonical source (this file)       |
+| `CLAUDE.md`                       | Claude Code / Opus entry point     |
+| `AGENTS.md`                       | Model-agnostic agent entry point   |
+| `.ai/manifest.yml`                | Machine-readable pipeline manifest |
+| `.ai/policies/`                   | Detailed policy documents          |
+| `.ai/agents/`                     | Per-agent contracts                |
+| `.ai/skills/`                     | Reusable skill playbooks           |
+| `.ai/templates/`                  | Handoff and report templates       |
+| `.cursor/rules/`                  | Cursor IDE rules                   |
+| `.github/copilot-instructions.md` | GitHub Copilot instructions        |
+| `commitlint.config.cjs`           | Conventional Commits schema        |
+| `docs/ai/work-items/`             | Per-feature pipeline artifacts     |
+| `docs/ai/adr/`                    | Architecture Decision Records      |
 
 ### Material Assumptions (Recorded)
 
