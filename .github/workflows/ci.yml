@@ -133,7 +133,15 @@ jobs:
 
       - name: cargo nextest
         working-directory: apps/api
-        run: cargo nextest run --workspace
+        env:
+          TEST_DATABASE_URL: postgres://ficus:ficus_password@localhost:5432/ficus
+        run: cargo nextest run --workspace --profile ci -j 1
+
+      - name: cargo deny
+        working-directory: apps/api
+        run: |
+          cargo install cargo-deny --locked 2>/dev/null || true
+          cargo deny check
 
   commitlint:
     name: Commit message lint

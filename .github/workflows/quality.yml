@@ -45,7 +45,6 @@ jobs:
 
       - name: Mobile unit tests with coverage
         run: pnpm --filter @ficus/mobile test:coverage
-        continue-on-error: true
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -60,15 +59,16 @@ jobs:
 
       - name: API coverage
         working-directory: apps/api
+        env:
+          TEST_DATABASE_URL: postgres://ficus:ficus_password@localhost:5432/ficus
         run: |
           cargo run -p ficus-infrastructure --bin migrate
-          cargo llvm-cov --workspace --all-features --fail-under-lines 80 --fail-under-functions 80
-        continue-on-error: true
+          cargo nextest run --workspace --profile ci -j 1
+          cargo llvm-cov --workspace --all-features --fail-under-lines 90 --fail-under-functions 90
 
   performance:
     name: Performance smoke (k6)
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
     services:
       postgres:
         image: postgres:16-alpine
@@ -109,8 +109,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y k6
 
-      - name: Run k6 script
-        run: node scripts/performance/run-k6.mjs --duration 30s --vus 5
+      - name: Run k6 scripts
+        run: node scripts/performance/run-k6.mjs --all --duration 30s --vus 5 --ci
 
   docs-check:
     name: Documentation structure

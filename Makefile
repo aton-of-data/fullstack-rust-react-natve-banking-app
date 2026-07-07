@@ -42,7 +42,7 @@ api-build:
 	cd apps/api && cargo build --release -p ficus-infrastructure
 
 api-test:
-	cd apps/api && cargo nextest run --workspace
+	cd apps/api && cargo nextest run --workspace --profile ci -j 1
 
 api-lint:
 	cd apps/api && cargo fmt --check

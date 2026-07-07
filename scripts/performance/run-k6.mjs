@@ -5,7 +5,8 @@
  * Usage:
  *   node scripts/performance/run-k6.mjs
  *   node scripts/performance/run-k6.mjs --duration 1m --vus 10
- *   API_BASE_URL=http://localhost:8080 node scripts/performance/run-k6.mjs
+ *   node scripts/performance/run-k6.mjs --all --duration 30s --vus 5
+ *   API_BASE_URL=http://localhost:8080 node scripts/performance/run-k6.mjs --script idempotency-replay.js
  *
  * Requires k6: https://k6.io/docs/get-started/installation/
  */
@@ -16,7 +17,12 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const scriptPath = join(__dirname, 'login-transfer-feed.js');
+
+const DEFAULT_SCRIPTS = [
+  'login-transfer-feed.js',
+  'idempotency-replay.js',
+  'transfer-concurrency.js',
+];
 
 function parseArgs(argv) {
   const opts = {
@@ -24,6 +30,8 @@ function parseArgs(argv) {
     vus: process.env.K6_VUS ?? '10',
     baseUrl: process.env.API_BASE_URL ?? 'http://localhost:8080',
     ci: false,
+    all: false,
+    scripts: [DEFAULT_SCRIPTS[0]],
   };
 
   for (let i = 2; i < argv.length; i++) {
@@ -34,12 +42,21 @@ function parseArgs(argv) {
       opts.vus = argv[++i];
     } else if (arg === '--base-url' && argv[i + 1]) {
       opts.baseUrl = argv[++i];
+    } else if (arg === '--script' && argv[i + 1]) {
+      opts.scripts = [argv[++i]];
+    } else if (arg === '--all') {
+      opts.all = true;
+      opts.scripts = [...DEFAULT_SCRIPTS];
     } else if (arg === '--ci') {
       opts.ci = true;
     } else if (arg === '--help' || arg === '-h') {
       printHelp();
       process.exit(0);
     }
+  }
+
+  if (opts.all) {
+    opts.scripts = [...DEFAULT_SCRIPTS];
   }
 
   return opts;
@@ -55,6 +72,8 @@ Options:
   --duration <time>   k6 duration (default: 1m)
   --vus <n>           virtual users (default: 10)
   --base-url <url>    API base URL (default: http://localhost:8080)
+  --script <file>     Run a single script from scripts/performance/
+  --all               Run login, idempotency, and concurrency scripts
   --ci                Exit 0 with skip message if k6 missing (for CI smoke)
   -h, --help          Show this help
 
@@ -68,26 +87,16 @@ function hasK6() {
   return result.status === 0;
 }
 
-function main() {
-  const opts = parseArgs(process.argv);
-
+function runScript(scriptName, opts) {
+  const scriptPath = join(__dirname, scriptName);
   if (!existsSync(scriptPath)) {
     console.error(`k6 script not found: ${scriptPath}`);
-    process.exit(1);
+    return 1;
   }
 
-  if (!hasK6()) {
-    const msg =
-      'k6 not installed — skipping performance test. Install: https://k6.io/docs/get-started/installation/';
-    if (opts.ci) {
-      console.warn(`[skip] ${msg}`);
-      process.exit(0);
-    }
-    console.error(msg);
-    process.exit(1);
-  }
-
-  console.log(`Running k6: ${opts.vus} VUs for ${opts.duration} against ${opts.baseUrl}`);
+  console.log(
+    `Running k6 script ${scriptName}: ${opts.vus} VUs for ${opts.duration} against ${opts.baseUrl}`,
+  );
 
   const result = spawnSync(
     'k6',
@@ -104,7 +113,31 @@ function main() {
     { stdio: 'inherit' },
   );
 
-  process.exit(result.status ?? 1);
+  return result.status ?? 1;
+}
+
+function main() {
+  const opts = parseArgs(process.argv);
+
+  if (!hasK6()) {
+    const msg =
+      'k6 not installed — skipping performance test. Install: https://k6.io/docs/get-started/installation/';
+    if (opts.ci) {
+      console.warn(`[skip] ${msg}`);
+      process.exit(0);
+    }
+    console.error(msg);
+    process.exit(1);
+  }
+
+  for (const script of opts.scripts) {
+    const code = runScript(script, opts);
+    if (code !== 0) {
+      process.exit(code);
+    }
+  }
+
+  process.exit(0);
 }
 
 main();
