@@ -10,6 +10,8 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,cjs,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,cjs,json,md}\"",
+    "format:packages": "prettier --write \"packages/**/*.{ts,tsx,js,mjs,cjs,json,md}\"",
+    "format:packages:check": "prettier --check \"packages/**/*.{ts,tsx,js,mjs,cjs,json,md}\"",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",

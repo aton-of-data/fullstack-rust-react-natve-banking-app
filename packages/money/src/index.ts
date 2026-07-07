@@ -13,7 +13,7 @@ export class MoneyError extends Error {
    */
   constructor(message: string) {
     super(message);
-    this.name = "MoneyError";
+    this.name = 'MoneyError';
   }
 }
 
@@ -30,7 +30,7 @@ export interface FormatMinorUnitsOptions {
 }
 
 const DEFAULT_MINOR_UNIT_DIGITS = 2;
-const DEFAULT_LOCALE = "en-US";
+const DEFAULT_LOCALE = 'en-US';
 
 /**
  * Normalizes a minor-unit value to a canonical decimal string without fractional minor units.
@@ -40,22 +40,22 @@ const DEFAULT_LOCALE = "en-US";
  * @throws {MoneyError} When the value is empty, fractional, or out of range.
  */
 export function normalizeMinorUnits(value: string | bigint): MinorUnits {
-  if (typeof value === "bigint") {
+  if (typeof value === 'bigint') {
     if (value < 0n) {
-      throw new MoneyError("minor units cannot be negative");
+      throw new MoneyError('minor units cannot be negative');
     }
     return value.toString(10);
   }
 
   const trimmed = value.trim();
   if (trimmed.length === 0) {
-    throw new MoneyError("minor units cannot be empty");
+    throw new MoneyError('minor units cannot be empty');
   }
-  if (trimmed.startsWith("-")) {
-    throw new MoneyError("minor units cannot be negative");
+  if (trimmed.startsWith('-')) {
+    throw new MoneyError('minor units cannot be negative');
   }
-  if (trimmed.includes(".")) {
-    throw new MoneyError("fractional minor units are not allowed");
+  if (trimmed.includes('.')) {
+    throw new MoneyError('fractional minor units are not allowed');
   }
   if (!/^\d+$/.test(trimmed)) {
     throw new MoneyError(`invalid minor units: ${value}`);
@@ -88,10 +88,7 @@ export function parseMinorUnits(input: string): MinorUnits {
  * @returns Locale-formatted major-unit display string (e.g. `$12.34`).
  * @throws {MoneyError} When minor units are invalid.
  */
-export function formatMinorUnits(
-  minor: string | bigint,
-  options: FormatMinorUnitsOptions,
-): string {
+export function formatMinorUnits(minor: string | bigint, options: FormatMinorUnitsOptions): string {
   const normalized = normalizeMinorUnits(minor);
   const minorBigInt = BigInt(normalized);
   const minorUnitDigits = options.minorUnitDigits ?? DEFAULT_MINOR_UNIT_DIGITS;
@@ -99,15 +96,13 @@ export function formatMinorUnits(
   const divisor = 10n ** BigInt(minorUnitDigits);
   const major = minorBigInt / divisor;
   const remainder = minorBigInt % divisor;
-  const fraction = remainder.toString(10).padStart(minorUnitDigits, "0");
+  const fraction = remainder.toString(10).padStart(minorUnitDigits, '0');
   const majorFormatted = formatIntegerWithGrouping(major, locale);
   const decimalSeparator = getDecimalSeparator(locale);
   const formattedNumber = `${majorFormatted}${decimalSeparator}${fraction}`;
 
   const symbol = getCurrencySymbol(options.currency, locale);
-  return symbol
-    ? `${symbol}${formattedNumber}`
-    : `${formattedNumber} ${options.currency}`;
+  return symbol ? `${symbol}${formattedNumber}` : `${formattedNumber} ${options.currency}`;
 }
 
 /**
@@ -119,16 +114,13 @@ export function formatMinorUnits(
  */
 function formatIntegerWithGrouping(value: bigint, locale: string): string {
   if (value <= BigInt(Number.MAX_SAFE_INTEGER)) {
-    return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(
-      Number(value),
-    );
+    return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(Number(value));
   }
 
   const digits = value.toString(10);
   const groupingSeparator =
-    new Intl.NumberFormat(locale)
-      .formatToParts(1000)
-      .find((part) => part.type === "group")?.value ?? ",";
+    new Intl.NumberFormat(locale).formatToParts(1000).find((part) => part.type === 'group')
+      ?.value ?? ',';
 
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, groupingSeparator);
 }
@@ -141,7 +133,7 @@ function formatIntegerWithGrouping(value: bigint, locale: string): string {
  */
 function getDecimalSeparator(locale: string): string {
   const parts = new Intl.NumberFormat(locale).formatToParts(1n);
-  return parts.find((part) => part.type === "decimal")?.value ?? ".";
+  return parts.find((part) => part.type === 'decimal')?.value ?? '.';
 }
 
 /**
@@ -152,15 +144,12 @@ function getDecimalSeparator(locale: string): string {
  * @returns Sum as canonical minor-unit string.
  * @throws {MoneyError} When operands are invalid or overflow occurs.
  */
-export function addMinor(
-  left: string | bigint,
-  right: string | bigint,
-): MinorUnits {
+export function addMinor(left: string | bigint, right: string | bigint): MinorUnits {
   const a = BigInt(normalizeMinorUnits(left));
   const b = BigInt(normalizeMinorUnits(right));
   const sum = a + b;
   if (sum < a) {
-    throw new MoneyError("minor-unit addition overflow");
+    throw new MoneyError('minor-unit addition overflow');
   }
   return sum.toString(10);
 }
@@ -173,14 +162,11 @@ export function addMinor(
  * @returns Difference as canonical minor-unit string.
  * @throws {MoneyError} When operands are invalid or the result would be negative.
  */
-export function subtractMinor(
-  left: string | bigint,
-  right: string | bigint,
-): MinorUnits {
+export function subtractMinor(left: string | bigint, right: string | bigint): MinorUnits {
   const a = BigInt(normalizeMinorUnits(left));
   const b = BigInt(normalizeMinorUnits(right));
   if (b > a) {
-    throw new MoneyError("minor-unit subtraction would be negative");
+    throw new MoneyError('minor-unit subtraction would be negative');
   }
   return (a - b).toString(10);
 }
@@ -194,9 +180,9 @@ export function subtractMinor(
  */
 function getCurrencySymbol(currency: string, locale: string): string {
   const parts = new Intl.NumberFormat(locale, {
-    style: "currency",
+    style: 'currency',
     currency,
-    currencyDisplay: "narrowSymbol",
+    currencyDisplay: 'narrowSymbol',
   }).formatToParts(0);
-  return parts.find((part) => part.type === "currency")?.value ?? "";
+  return parts.find((part) => part.type === 'currency')?.value ?? '';
 }

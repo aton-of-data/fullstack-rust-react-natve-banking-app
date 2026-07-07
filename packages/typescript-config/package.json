@@ -6,5 +6,9 @@
   "exports": {
     "./base.json": "./base.json",
     "./react-native.json": "./react-native.json"
+  },
+  "scripts": {
+    "lint": "prettier --check \"*.json\"",
+    "format:check": "prettier --check \"*.json\""
   }
 }

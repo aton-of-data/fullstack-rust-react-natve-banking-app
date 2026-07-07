@@ -63,7 +63,7 @@ export interface BalanceResponse {
 /**
  * Ledger direction values returned by the API.
  */
-export type LedgerDirection = "DEBIT" | "CREDIT" | string;
+export type LedgerDirection = 'DEBIT' | 'CREDIT' | string;
 
 /**
  * Single ledger entry in account history.
@@ -100,7 +100,7 @@ export interface TransferRequest {
 /**
  * Transfer status values returned by the API.
  */
-export type TransferStatus = "COMPLETED" | "DECLINED" | string;
+export type TransferStatus = 'COMPLETED' | 'DECLINED' | string;
 
 /**
  * Transfer creation response.

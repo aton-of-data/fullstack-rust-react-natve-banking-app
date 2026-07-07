@@ -1,4 +1,4 @@
-import type { PageResponse } from "@ficus/contracts";
+import type { PageResponse } from '@ficus/contracts';
 
 /**
  * Builds a cursor-paginated API page for tests.
@@ -8,10 +8,7 @@ import type { PageResponse } from "@ficus/contracts";
  * @param nextCursor Optional next-page cursor.
  * @returns API-shaped page response.
  */
-export function createPageResponse<T>(
-  items: T[],
-  nextCursor?: string | null,
-): PageResponse<T> {
+export function createPageResponse<T>(items: T[], nextCursor?: string | null): PageResponse<T> {
   if (nextCursor === undefined) {
     return { items };
   }
@@ -25,12 +22,12 @@ export function createPageResponse<T>(
  * @returns Wire-format minor-unit string.
  */
 export function minorUnits(value: string | number | bigint): string {
-  if (typeof value === "bigint") {
+  if (typeof value === 'bigint') {
     return value.toString(10);
   }
-  if (typeof value === "number") {
+  if (typeof value === 'number') {
     if (!Number.isInteger(value) || value < 0) {
-      throw new Error("minorUnits fixture must be a non-negative integer");
+      throw new Error('minorUnits fixture must be a non-negative integer');
     }
     return String(value);
   }
@@ -40,17 +37,17 @@ export function minorUnits(value: string | number | bigint): string {
 /**
  * Fixed UUID useful for deterministic tests.
  */
-export const TEST_USER_ID = "00000000-0000-4000-8000-000000000001";
+export const TEST_USER_ID = '00000000-0000-4000-8000-000000000001';
 
 /**
  * Fixed transfer UUID useful for deterministic tests.
  */
-export const TEST_TRANSFER_ID = "00000000-0000-4000-8000-000000000002";
+export const TEST_TRANSFER_ID = '00000000-0000-4000-8000-000000000002';
 
 /**
  * Fixed ISO timestamp useful for deterministic tests.
  */
-export const TEST_ISO_TIMESTAMP = "2026-01-01T00:00:00.000Z";
+export const TEST_ISO_TIMESTAMP = '2026-01-01T00:00:00.000Z';
 
 /**
  * Resolves on the next microtask. Prefer in unit tests over arbitrary `setTimeout`.
