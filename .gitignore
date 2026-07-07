@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+# Rust
+target/
+**/*.rs.bk
+
+# Expo / React Native
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Test / coverage
+coverage/
+*.lcov
+.nyc_output/
+test-results/
+
+# Logs
+*.log
+logs/
+
+# Docker volumes
+infra/docker/volumes/
+
+# Security scan artifacts
+gitleaks-report.json
+trivy-report.json
+
+# Performance
+scripts/performance/results/
+
+# Misc
+*.pem

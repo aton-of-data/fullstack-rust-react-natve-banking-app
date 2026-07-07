@@ -1,0 +1,102 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ficus-postgres
+    environment:
+      POSTGRES_USER: ficus
+      POSTGRES_PASSWORD: ficus_password
+      POSTGRES_DB: ficus
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ficus -d ficus"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.api
+    container_name: ficus-api
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: postgres://ficus_app:ficus_app_password@postgres:5432/ficus
+      DATABASE_MIGRATION_URL: postgres://ficus_migrator:ficus_migrator_password@postgres:5432/ficus
+      JWT_SECRET: local-dev-jwt-secret-change-in-production
+      JWT_EXPIRY_SECS: "3600"
+      API_HOST: 0.0.0.0
+      API_PORT: "8080"
+      ENVIRONMENT: development
+      RUST_LOG: info,ficus_api=debug
+      CORS_ORIGINS: http://localhost:8081,http://localhost:19006
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_SERVICE_NAME: ficus-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles:
+      - full
+      - api
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.116.1
+    container_name: ficus-otel
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes:
+      - ./infra/otel/config.yaml:/etc/otel/config.yaml:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+      - "8889:8889"
+    profiles:
+      - observability
+      - full
+
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    container_name: ficus-prometheus
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    profiles:
+      - observability
+      - full
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    container_name: ficus-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - loki
+    profiles:
+      - observability
+      - full
+
+  loki:
+    image: grafana/loki:3.3.2
+    container_name: ficus-loki
+    command: -config.file=/etc/loki/config.yaml
+    volumes:
+      - ./infra/loki/config.yaml:/etc/loki/config.yaml:ro
+    ports:
+      - "3100:3100"
+    profiles:
+      - observability
+      - full
+
+volumes:
+  postgres_data:
