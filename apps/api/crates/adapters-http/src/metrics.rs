@@ -7,7 +7,7 @@ use metrics_exporter_prometheus::{PrometheusBuilder, PrometheusHandle};
 static PROMETHEUS: OnceLock<PrometheusHandle> = OnceLock::new();
 
 /// Registers Prometheus metric descriptions and installs the exporter.
-pub fn init_metrics() -> PrometheusHandle {
+pub fn init_metrics() -> Result<PrometheusHandle, String> {
     describe_counter!(
         "ficus_http_requests_total",
         "Total HTTP requests handled by route and status"
@@ -45,18 +45,25 @@ pub fn init_metrics() -> PrometheusHandle {
         "Active Server-Sent Events feed stream connections"
     );
 
-    PROMETHEUS
-        .get_or_init(|| {
-            PrometheusBuilder::new()
-                .install_recorder()
-                .expect("failed to install Prometheus metrics recorder")
+    if let Some(handle) = PROMETHEUS.get() {
+        return Ok(handle.clone());
+    }
+
+    PrometheusBuilder::new()
+        .install_recorder()
+        .map_err(|err| format!("failed to install Prometheus metrics recorder: {err}"))
+        .inspect(|handle| {
+            let _ = PROMETHEUS.set(handle.clone());
         })
-        .clone()
 }
 
 /// Returns the Prometheus scrape handle.
 pub fn prometheus_handle() -> PrometheusHandle {
-    PROMETHEUS.get().cloned().unwrap_or_else(init_metrics)
+    PROMETHEUS
+        .get()
+        .cloned()
+        .or_else(|| init_metrics().ok())
+        .unwrap_or_else(|| PrometheusBuilder::new().build_recorder().handle())
 }
 
 /// Records request duration and count for a completed HTTP call.

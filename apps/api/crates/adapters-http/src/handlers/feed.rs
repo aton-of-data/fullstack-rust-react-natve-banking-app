@@ -17,6 +17,7 @@ use futures::future;
 use futures::stream::{self, Stream, StreamExt};
 use serde::Deserialize;
 use tokio_stream::wrappers::BroadcastStream;
+use tracing::warn;
 
 use crate::error::ApiError;
 use crate::metrics::{sse_connection_closed, sse_connection_opened};
@@ -90,18 +91,15 @@ pub async fn stream_feed(
         Vec::new()
     };
 
-    let replay_stream = stream::iter(
-        replay
-            .into_iter()
-            .map(|item| Ok::<Event, Infallible>(feed_event(&FeedItemResponse::from(item)))),
-    );
+    let replay_stream =
+        stream::iter(replay.into_iter().filter_map(|item| {
+            feed_event(&FeedItemResponse::from(item)).map(Ok::<Event, Infallible>)
+        }));
 
     let live_rx = state.feed.subscribe();
     let live_stream = BroadcastStream::new(live_rx).filter_map(|msg| {
         future::ready(match msg {
-            Ok(item) => Some(Ok::<Event, Infallible>(feed_event(
-                &FeedItemResponse::from(item),
-            ))),
+            Ok(item) => feed_event(&FeedItemResponse::from(item)).map(Ok::<Event, Infallible>),
             Err(_) => None,
         })
     });
@@ -119,12 +117,18 @@ pub async fn stream_feed(
     ))
 }
 
-fn feed_event(item: &FeedItemResponse) -> Event {
-    Event::default()
+fn feed_event(item: &FeedItemResponse) -> Option<Event> {
+    match Event::default()
         .id(item.transfer_id.to_string())
         .event("transfer")
         .json_data(item)
-        .expect("feed item serializes")
+    {
+        Ok(event) => Some(event),
+        Err(err) => {
+            warn!(error = %err, transfer_id = %item.transfer_id, "failed to serialize feed SSE event");
+            None
+        }
+    }
 }
 
 /// Decrements the SSE gauge when the stream is dropped.
