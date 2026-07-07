@@ -1,7 +1,9 @@
 //! Verifies total funds are conserved across transfers.
 
+use ficus_domain::errors::DomainError;
 use ficus_testkit::{
-    execute_transfer, setup_isolated_test_db, total_balance_minor, TestAppBuilder,
+    count_all_transfers, count_completed_transfers, execute_transfer, orphan_ledger_entries,
+    setup_isolated_test_db, total_balance_minor, TestAppBuilder,
 };
 
 #[tokio::test]
@@ -85,6 +87,12 @@ async fn failed_transfer_does_not_change_total_funds() {
         .expect("app");
 
     let before = total_balance_minor(&app.db).await.expect("before");
+    let before_transfers = count_all_transfers(&app.db)
+        .await
+        .expect("before transfers");
+    let before_completed = count_completed_transfers(&app.db)
+        .await
+        .expect("before completed");
     let err = execute_transfer(
         &app,
         users.charlie.id,
@@ -94,10 +102,21 @@ async fn failed_transfer_does_not_change_total_funds() {
     )
     .await
     .expect_err("insufficient funds");
-    assert!(matches!(
-        err,
-        ficus_domain::errors::DomainError::InsufficientFunds
-    ));
+    assert!(matches!(err, DomainError::InsufficientFunds));
     let after = total_balance_minor(&app.db).await.expect("after");
     assert_eq!(before, after);
+    assert_eq!(
+        count_all_transfers(&app.db).await.expect("after transfers"),
+        before_transfers
+    );
+    assert_eq!(
+        count_completed_transfers(&app.db)
+            .await
+            .expect("after completed"),
+        before_completed
+    );
+    assert!(orphan_ledger_entries(&app.db)
+        .await
+        .expect("orphans")
+        .is_empty());
 }

@@ -3,7 +3,8 @@
 use ficus_domain::errors::DomainError;
 use ficus_domain::idempotency::request_fingerprint;
 use ficus_testkit::{
-    execute_transfer, setup_isolated_test_db, total_balance_minor, TestAppBuilder,
+    count_completed_transfers, execute_transfer, setup_isolated_test_db, total_balance_minor,
+    TestAppBuilder,
 };
 
 #[tokio::test]
@@ -156,6 +157,52 @@ async fn concurrent_duplicate_key_only_transfers_once() {
         total_balance_minor(&app.db).await.expect("total after")
     );
     let _ = conflicts_or_ok;
+}
+
+#[tokio::test]
+async fn client_retry_after_success_does_not_double_charge() {
+    let (pg, db, users) = setup_isolated_test_db().await.expect("setup");
+    let app = TestAppBuilder::new(&pg.database_url)
+        .with_db(db.clone())
+        .with_users(users.clone())
+        .build()
+        .await
+        .expect("app");
+
+    let key = "550e8400-e29b-41d4-a716-446655440005";
+    let before_completed = count_completed_transfers(&app.db)
+        .await
+        .expect("before completed");
+    let sender_before = app
+        .accounts
+        .get_balance(users.alice.account_id)
+        .await
+        .expect("sender balance")
+        .balance_minor;
+
+    let first = execute_transfer(&app, users.alice.id, "bob", 2_000, key)
+        .await
+        .expect("first transfer");
+
+    // Simulates client retry when network outcome is unknown but first request succeeded.
+    let second = execute_transfer(&app, users.alice.id, "bob", 2_000, key)
+        .await
+        .expect("retry");
+
+    assert_eq!(first.id, second.id);
+
+    let sender_after = app
+        .accounts
+        .get_balance(users.alice.account_id)
+        .await
+        .expect("sender balance after")
+        .balance_minor;
+    assert_eq!(sender_after, sender_before - 2_000);
+
+    let after_completed = count_completed_transfers(&app.db)
+        .await
+        .expect("after completed");
+    assert_eq!(after_completed, before_completed + 1);
 }
 
 #[tokio::test]

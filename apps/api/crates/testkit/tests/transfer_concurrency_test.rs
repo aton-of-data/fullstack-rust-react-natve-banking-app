@@ -70,11 +70,17 @@ async fn hundred_concurrent_transfers_from_same_account() {
 
     // 3. Only fundable transfers succeed.
     let max_fundable = (initial_sender / TRANSFER_AMOUNT) as usize;
-    assert!(
-        ok.len() <= max_fundable,
-        "success count {} exceeds fundable {}",
+    assert_eq!(
         ok.len(),
-        max_fundable
+        max_fundable,
+        "expected exactly {max_fundable} successes, got {}",
+        ok.len()
+    );
+    assert_eq!(
+        err.len(),
+        CONCURRENT_REQUESTS - max_fundable,
+        "expected {} failures",
+        CONCURRENT_REQUESTS - max_fundable
     );
 
     // 4. Failed transfers leave no partial state (no orphan ledger rows).
