@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use ficus_domain::errors::DomainError;
 use ficus_domain::idempotency::{request_fingerprint, validate_idempotency_key};
+use metrics::counter;
 
 use crate::ports::{
     FeedBroadcaster, FeedItem, IdempotencyRepository, Page, TransferExecutor, TransferRecord,
@@ -59,8 +60,10 @@ impl TransferService {
             .await?
         {
             if existing.fingerprint != fingerprint {
+                counter!("ficus_transfer_idempotency_conflict_total").increment(1);
                 return Err(DomainError::IdempotencyConflict);
             }
+            counter!("ficus_transfer_idempotency_replay_total").increment(1);
             return serde_json::from_str(&existing.response_body)
                 .map_err(|_| DomainError::Validation("stored response corrupt".into()));
         }

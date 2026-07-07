@@ -1,6 +1,7 @@
 //! Atomic PostgreSQL transfer executor with double-entry ledger writes.
 
 use std::collections::BTreeMap;
+use std::str::FromStr;
 use std::time::Duration;
 
 use async_trait::async_trait;
@@ -12,6 +13,7 @@ use ficus_domain::errors::DomainError;
 use ficus_domain::ledger::{build_transfer_entries, LedgerDirection};
 use ficus_domain::money::Money;
 use ficus_domain::transfer::TransferStatus;
+use metrics::counter;
 use rand::Rng;
 use sea_orm::sea_query::LockType;
 use sea_orm::{
@@ -68,6 +70,7 @@ impl PostgresTransferExecutor {
                 Ok(record) => return Ok(record),
                 Err(err) if is_retryable_domain(&err) && attempt < MAX_SERIALIZATION_RETRIES => {
                     attempt += 1;
+                    counter!("ficus_transfer_serialization_retry_total").increment(1);
                     warn!(
                         attempt,
                         max_attempts = MAX_SERIALIZATION_RETRIES,
@@ -508,4 +511,27 @@ fn is_retryable_domain(err: &DomainError) -> bool {
     )
 }
 
-use std::str::FromStr;
+#[cfg(test)]
+mod retry_tests {
+    use super::*;
+
+    #[test]
+    fn retryable_domain_errors_include_serialization_and_deadlock() {
+        assert!(is_retryable_domain(&DomainError::Validation(
+            "serialization failure: conflict".into()
+        )));
+        assert!(is_retryable_domain(&DomainError::Validation(
+            "deadlock detected".into()
+        )));
+        assert!(!is_retryable_domain(&DomainError::InsufficientFunds));
+    }
+
+    #[test]
+    fn jitter_backoff_stays_within_configured_bounds() {
+        for attempt in 1..=MAX_SERIALIZATION_RETRIES {
+            let delay = jitter_backoff(attempt);
+            assert!(delay.as_millis() >= BASE_RETRY_DELAY_MS as u128);
+            assert!(delay.as_millis() <= (MAX_RETRY_DELAY_MS * 2) as u128);
+        }
+    }
+}

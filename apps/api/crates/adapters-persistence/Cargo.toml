@@ -9,6 +9,7 @@ ficus-domain.workspace = true
 ficus-application.workspace = true
 ficus-migrations = { path = "../../migrations" }
 async-trait.workspace = true
+metrics.workspace = true
 chrono.workspace = true
 futures.workspace = true
 rand.workspace = true

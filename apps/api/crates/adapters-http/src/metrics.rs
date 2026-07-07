@@ -24,6 +24,22 @@ pub fn init_metrics() -> PrometheusHandle {
         "ficus_transfers_total",
         "Transfer requests by outcome (completed, declined, error)"
     );
+    describe_counter!(
+        "ficus_transfer_idempotency_replay_total",
+        "Idempotent transfer replays returning stored response"
+    );
+    describe_counter!(
+        "ficus_transfer_idempotency_conflict_total",
+        "Idempotency key reuse with different payload"
+    );
+    describe_counter!(
+        "ficus_transfer_serialization_retry_total",
+        "Serialization/deadlock retries during transfer execution"
+    );
+    describe_counter!(
+        "ficus_feed_events_published_total",
+        "Feed events published to subscribers"
+    );
     describe_gauge!(
         "ficus_sse_connections_active",
         "Active Server-Sent Events feed stream connections"

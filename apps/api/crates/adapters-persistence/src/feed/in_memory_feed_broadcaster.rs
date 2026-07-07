@@ -5,6 +5,7 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use ficus_application::ports::{FeedBroadcaster, FeedItem};
 use ficus_domain::errors::DomainError;
+use metrics::counter;
 use sea_orm::{ConnectionTrait, DatabaseBackend, DatabaseConnection, Statement};
 use tokio::sync::broadcast;
 use tokio::task::JoinHandle;
@@ -69,6 +70,7 @@ impl FeedBroadcaster for InMemoryFeedBroadcaster {
         }
 
         let _ = self.sender.send(item);
+        counter!("ficus_feed_events_published_total").increment(1);
         Ok(())
     }
 
