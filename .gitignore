@@ -29,7 +29,9 @@ web-build/
 
 # IDE
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 *.swp
 *.swo
 .DS_Store

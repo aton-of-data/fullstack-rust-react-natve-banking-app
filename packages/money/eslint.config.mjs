@@ -1,3 +1,3 @@
 import { createFicusConfig } from '@ficus/eslint-config';
 
-export default createFicusConfig();
+export default createFicusConfig([], { tsconfigRootDir: import.meta.dirname });

@@ -2,7 +2,10 @@
   "extends": "@ficus/typescript-config/base.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.tsbuildinfo",
+    "types": ["vitest/globals"]
   },
   "include": ["src/**/*.ts"]
 }

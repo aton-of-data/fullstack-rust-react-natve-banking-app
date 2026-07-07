@@ -13,6 +13,7 @@
     "format:packages": "prettier --write \"packages/**/*.{ts,tsx,js,mjs,cjs,json,md}\"",
     "format:packages:check": "prettier --check \"packages/**/*.{ts,tsx,js,mjs,cjs,json,md}\"",
     "typecheck": "turbo run typecheck",
+    "typecheck:workspace": "tsc -b tsconfig.json",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
     "test:e2e": "turbo run test:e2e",

@@ -3,7 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@ficus/contracts": ["../../packages/contracts/src/index.ts"],
+      "@ficus/money": ["../../packages/money/src/index.ts"]
     },
     "types": ["vitest/globals"]
   },

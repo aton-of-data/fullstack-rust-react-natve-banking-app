@@ -56,13 +56,29 @@ export const architecturalRules = {
  * Default Ficus ESLint flat config with architectural rules and JSDoc enforcement.
  *
  * @param {import('eslint').Linter.Config[]} [overrides] Additional config slices appended last.
+ * @param {{ tsconfigRootDir?: string }} [options] Parser options for type-aware linting.
  * @returns {import('eslint').Linter.Config[]}
  */
-export function createFicusConfig(overrides = []) {
+export function createFicusConfig(overrides = [], options = {}) {
+  const { tsconfigRootDir } = options;
+
   return tseslint.config(
     js.configs.recommended,
     ...tseslint.configs.recommended,
     prettier,
+    ...(tsconfigRootDir
+      ? [
+          {
+            languageOptions: {
+              parserOptions: {
+                projectService: true,
+                tsconfigRootDir,
+                allowDefaultProject: ['eslint.config.mjs', '*.config.mjs'],
+              },
+            },
+          },
+        ]
+      : []),
     {
       plugins: {
         'react-hooks': reactHooks,
