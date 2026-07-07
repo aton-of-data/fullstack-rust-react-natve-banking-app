@@ -1,0 +1,31 @@
+[package]
+name = "ficus-adapters-http"
+description = "Ficus HTTP adapters — Axum routes, middleware, and API surface"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+ficus-application.workspace = true
+ficus-domain.workspace = true
+axum.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+hyper.workspace = true
+tokio.workspace = true
+tokio-stream = { workspace = true, features = ["sync"] }
+futures.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+async-trait.workspace = true
+metrics.workspace = true
+metrics-exporter-prometheus.workspace = true
+utoipa.workspace = true
+utoipa-swagger-ui.workspace = true
+dashmap = "6.1"
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }

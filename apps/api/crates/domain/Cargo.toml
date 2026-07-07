@@ -1,0 +1,17 @@
+[package]
+name = "ficus-domain"
+description = "Ficus domain layer — pure business rules"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+serde = { workspace = true, features = ["derive"] }
+uuid = { workspace = true, features = ["v4"] }
+chrono = { workspace = true, features = ["serde"] }
+sha2.workspace = true
+hex.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+rstest.workspace = true

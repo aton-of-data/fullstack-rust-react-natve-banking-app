@@ -1,0 +1,25 @@
+[package]
+name = "ficus-adapters-persistence"
+description = "SeaORM persistence adapters for Ficus API"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+ficus-domain.workspace = true
+ficus-application.workspace = true
+ficus-migrations = { path = "../../migrations" }
+async-trait.workspace = true
+chrono.workspace = true
+futures.workspace = true
+rand.workspace = true
+sea-orm.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true

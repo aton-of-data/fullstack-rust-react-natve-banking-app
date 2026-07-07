@@ -1,0 +1,100 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/domain",
+    "crates/application",
+    "crates/contracts",
+    "crates/adapters-http",
+    "crates/adapters-persistence",
+    "crates/infrastructure",
+    "crates/testkit",
+    "migrations",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["Ficus Platforms"]
+
+[workspace.dependencies]
+# Async
+tokio = { version = "1.43", features = ["full"] }
+async-trait = "0.1"
+
+# Web
+axum = { version = "0.8", features = ["macros"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace", "limit", "set-header"] }
+hyper = "1.6"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Database
+sea-orm = { version = "1.1", features = ["sqlx-postgres", "runtime-tokio-rustls", "macros", "with-chrono", "with-uuid", "with-rust_decimal"] }
+sea-orm-migration = { version = "1.1", features = ["sqlx-postgres", "runtime-tokio-rustls"] }
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono"] }
+
+# Auth & crypto
+jsonwebtoken = "9.3"
+argon2 = "0.5"
+uuid = { version = "1.11", features = ["v4", "serde"] }
+sha2 = "0.10"
+hex = "0.4"
+
+# Validation
+validator = { version = "0.19", features = ["derive"] }
+
+# Error handling
+thiserror = "2.0"
+anyhow = "1.0"
+
+# Observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+opentelemetry = "0.27"
+opentelemetry_sdk = { version = "0.27", features = ["rt-tokio"] }
+opentelemetry-otlp = { version = "0.27", features = ["grpc-tonic"] }
+tracing-opentelemetry = "0.28"
+metrics = "0.24"
+metrics-exporter-prometheus = "0.16"
+
+# OpenAPI
+utoipa = { version = "5.3", features = ["axum_extras", "chrono", "uuid"] }
+utoipa-swagger-ui = { version = "9.0", features = ["axum"] }
+
+# Utilities
+chrono = { version = "0.4", features = ["serde"] }
+rust_decimal = { version = "1.36", features = ["serde-with-str"] }
+futures = "0.3"
+tokio-stream = "0.1"
+rand = "0.8"
+dotenvy = "0.15"
+
+# Internal crates
+ficus-domain = { path = "crates/domain" }
+ficus-application = { path = "crates/application" }
+ficus-contracts = { path = "crates/contracts" }
+ficus-adapters-http = { path = "crates/adapters-http" }
+ficus-adapters-persistence = { path = "crates/adapters-persistence" }
+ficus-infrastructure = { path = "crates/infrastructure" }
+ficus-testkit = { path = "crates/testkit" }
+
+# Testing
+rstest = "0.24"
+proptest = "1.6"
+wiremock = "0.6"
+testcontainers = "0.23"
+testcontainers-modules = { version = "0.11", features = ["postgres"] }
+
+[profile.release]
+lto = true
+codegen-units = 1
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3

@@ -1,0 +1,28 @@
+[package]
+name = "ficus-testkit"
+description = "Ficus test fixtures, Postgres testcontainers, and integration helpers"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+ficus-domain.workspace = true
+ficus-application.workspace = true
+ficus-adapters-persistence.workspace = true
+ficus-infrastructure.workspace = true
+ficus-migrations = { path = "../../migrations" }
+async-trait.workspace = true
+axum.workspace = true
+chrono.workspace = true
+futures.workspace = true
+sea-orm.workspace = true
+sea-orm-migration.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+testcontainers.workspace = true
+testcontainers-modules.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+reqwest = { version = "0.12", features = ["json"] }

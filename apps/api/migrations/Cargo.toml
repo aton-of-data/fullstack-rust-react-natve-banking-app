@@ -1,0 +1,14 @@
+[package]
+name = "ficus-migrations"
+description = "SeaORM migrations for Ficus API"
+version.workspace = true
+edition.workspace = true
+publish = false
+
+[lib]
+name = "ficus_migrations"
+path = "src/lib.rs"
+
+[dependencies]
+async-trait.workspace = true
+sea-orm-migration.workspace = true

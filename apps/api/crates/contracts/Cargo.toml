@@ -1,0 +1,11 @@
+[package]
+name = "ficus-contracts"
+description = "Ficus API contracts — HTTP DTOs and OpenAPI schemas"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+serde.workspace = true
+utoipa.workspace = true
+uuid.workspace = true
+chrono.workspace = true

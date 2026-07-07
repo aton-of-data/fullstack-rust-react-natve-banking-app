@@ -1,0 +1,45 @@
+[package]
+name = "ficus-infrastructure"
+description = "Ficus infrastructure — config, telemetry, composition root"
+version.workspace = true
+edition.workspace = true
+
+[[bin]]
+name = "ficus-api"
+path = "src/bin/ficus-api.rs"
+
+[[bin]]
+name = "migrate"
+path = "src/bin/migrate.rs"
+
+[[bin]]
+name = "seed"
+path = "src/bin/seed.rs"
+
+[dependencies]
+ficus-adapters-http.workspace = true
+ficus-adapters-persistence.workspace = true
+ficus-application.workspace = true
+ficus-domain.workspace = true
+ficus-migrations = { path = "../../migrations" }
+async-trait.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+dotenvy.workspace = true
+axum.workspace = true
+sea-orm.workspace = true
+sea-orm-migration.workspace = true
+jsonwebtoken.workspace = true
+argon2.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+metrics-exporter-prometheus.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+ficus-testkit.workspace = true
+reqwest = { version = "0.12", features = ["json"] }
+wiremock.workspace = true
