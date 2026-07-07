@@ -4,14 +4,14 @@
 
 ## Commands and exit codes
 
-| Command | Exit |
-|---------|------|
-| `TEST_DATABASE_URL=... cargo test -p ficus-testkit -- --test-threads=1` | 0 |
-| `TEST_DATABASE_URL=... cargo test --workspace -- --test-threads=1` | 0 |
-| `cargo fmt --check` | 0 |
-| `cargo clippy --workspace --all-targets --all-features -- -D warnings` | 0 |
-| `pnpm --filter @ficus/mobile test` | 0 |
-| `pnpm --filter @ficus/mobile typecheck` | 0 |
+| Command                                                                 | Exit |
+| ----------------------------------------------------------------------- | ---- |
+| `TEST_DATABASE_URL=... cargo test -p ficus-testkit -- --test-threads=1` | 0    |
+| `TEST_DATABASE_URL=... cargo test --workspace -- --test-threads=1`      | 0    |
+| `cargo fmt --check`                                                     | 0    |
+| `cargo clippy --workspace --all-targets --all-features -- -D warnings`  | 0    |
+| `pnpm --filter @ficus/mobile test`                                      | 0    |
+| `pnpm --filter @ficus/mobile typecheck`                                 | 0    |
 
 ## Testkit summary (51 tests)
 

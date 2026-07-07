@@ -52,10 +52,10 @@ Automated tests for money movement logic are required.
 
 ### Tech Stack
 
-| Layer    | Choice            |
-| -------- | ----------------- |
-| Frontend | Pure React Native |
-| Backend  | Rust              |
+| Layer    | Choice              |
+| -------- | ------------------- |
+| Frontend | React Native (Expo) |
+| Backend  | Rust (`apps/api/`)  |
 
 ---
 
@@ -119,10 +119,10 @@ Policy: `.ai/policies/frontend-tooling.md`. Templates: `.ai/templates/frontend-t
 
 ### Rust Backend Architecture
 
-Layered workspace under `backend/`:
+Layered workspace under `apps/api/crates/`:
 
 ```
-backend/crates/
+apps/api/crates/
   domain/  application/  contracts/
   adapters-http/  adapters-persistence/  infrastructure/  testkit/
 ```
@@ -173,8 +173,8 @@ Every change includes proportionate verification: typecheck, **lint**, **prettie
 
 ### Material Assumptions (Recorded)
 
-1. **Greenfield repository** — no existing code; governance bootstrapped before implementation.
-2. **Package managers** — npm for React Native; Cargo for Rust.
+1. **Implemented monorepo** — pnpm workspaces with `apps/mobile` (Expo), `apps/api` (Rust), and shared `packages/`.
+2. **Package managers** — pnpm for JavaScript/TypeScript; Cargo for Rust.
 3. **Real-time feed** — WebSocket or SSE via backend; RTK Query integration on frontend (ADR required).
 4. **Money representation** — integer minor units (cents) in backend domain; ADR-0001 proposed.
 5. **CI** — GitHub Actions must run lint, format:check, test, and commitlint on PRs.
