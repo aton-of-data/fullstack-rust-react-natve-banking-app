@@ -1,0 +1,140 @@
+name: Quality
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  coverage:
+    name: Coverage gates
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ficus
+          POSTGRES_PASSWORD: ficus_password
+          POSTGRES_DB: ficus
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ficus -d ficus"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://ficus:ficus_password@localhost:5432/ficus
+      DATABASE_MIGRATION_URL: postgres://ficus:ficus_password@localhost:5432/ficus
+      JWT_SECRET: ci-jwt-secret-minimum-thirty-two-characters-long
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Mobile unit tests with coverage
+        run: pnpm --filter @ficus/mobile test:coverage
+        continue-on-error: true
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/api
+
+      - name: Install coverage tools
+        run: |
+          cargo install cargo-llvm-cov --locked 2>/dev/null || true
+          cargo install cargo-nextest --locked 2>/dev/null || true
+
+      - name: API coverage
+        working-directory: apps/api
+        run: |
+          cargo run -p ficus-infrastructure --bin migrate
+          cargo llvm-cov --workspace --all-features --fail-under-lines 80 --fail-under-functions 80
+        continue-on-error: true
+
+  performance:
+    name: Performance smoke (k6)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ficus
+          POSTGRES_PASSWORD: ficus_password
+          POSTGRES_DB: ficus
+        ports:
+          - 5432:5432
+    env:
+      DATABASE_URL: postgres://ficus:ficus_password@localhost:5432/ficus
+      DATABASE_MIGRATION_URL: postgres://ficus:ficus_password@localhost:5432/ficus
+      JWT_SECRET: ci-jwt-secret-minimum-thirty-two-characters-long
+      API_BASE_URL: http://127.0.0.1:8080
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/api
+
+      - name: Build and start API
+        working-directory: apps/api
+        run: |
+          cargo run -p ficus-infrastructure --bin migrate
+          cargo run -p ficus-infrastructure --bin seed
+          cargo run -p ficus-infrastructure --bin ficus-api &
+          sleep 5
+          curl -sf http://127.0.0.1:8080/health/ready
+
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Run k6 script
+        run: node scripts/performance/run-k6.mjs --duration 30s --vus 5
+
+  docs-check:
+    name: Documentation structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify required docs exist
+        run: |
+          test -f README.md
+          test -f docs/architecture/financial-ledger.md
+          test -f docs/operations/observability.md
+          test -f docs/api/openapi.md
+          test -d docs/ai/adr
+          echo "Documentation structure OK"
+
+      - name: Prettier on docs
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: |
+          pnpm install --frozen-lockfile
+          pnpm format:check

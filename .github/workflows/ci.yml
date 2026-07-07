@@ -1,0 +1,160 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+      governance: ${{ steps.filter.outputs.governance }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'apps/mobile/**'
+              - 'packages/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'turbo.json'
+            backend:
+              - 'apps/api/**'
+              - 'Makefile'
+              - 'docker-compose.yml'
+              - 'infra/**'
+            governance:
+              - '.ai/**'
+              - '.cursor/**'
+              - 'docs/**'
+              - 'context.md'
+              - 'AGENTS.md'
+
+  frontend:
+    name: Frontend
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.governance == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prettier
+        run: pnpm format:check
+
+      - name: ESLint + JSDoc
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+  backend:
+    name: Backend
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.governance == 'true' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ficus
+          POSTGRES_PASSWORD: ficus_password
+          POSTGRES_DB: ficus
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ficus -d ficus"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://ficus:ficus_password@localhost:5432/ficus
+      DATABASE_MIGRATION_URL: postgres://ficus:ficus_password@localhost:5432/ficus
+      JWT_SECRET: ci-jwt-secret-minimum-thirty-two-characters-long
+      JWT_EXPIRY_SECS: "3600"
+      API_HOST: 127.0.0.1
+      API_PORT: "8080"
+      ENVIRONMENT: ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/api
+
+      - name: Install cargo-nextest
+        uses: taiki-e/install-action@nextest
+
+      - name: cargo fmt
+        working-directory: apps/api
+        run: cargo fmt --check
+
+      - name: cargo clippy
+        working-directory: apps/api
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      - name: Run migrations
+        working-directory: apps/api
+        run: cargo run -p ficus-infrastructure --bin migrate
+
+      - name: cargo nextest
+        working-directory: apps/api
+        run: cargo nextest run --workspace
+
+  commitlint:
+    name: Commit message lint
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Validate PR commits
+        run: |
+          npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
