@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import { authReducer } from '@/features/auth';
 import { transferFormReducer } from '@/features/transfer-form';
+import { transferSubmissionReducer } from '@/features/transfer-submission';
 import { uiReducer } from '@/features/ui';
 import { baseApi } from '@/services/baseApi';
 
@@ -14,6 +15,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     transferForm: transferFormReducer,
+    transferSubmission: transferSubmissionReducer,
     ui: uiReducer,
     [baseApi.reducerPath]: baseApi.reducer,
   },

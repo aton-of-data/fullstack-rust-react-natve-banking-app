@@ -9,6 +9,7 @@ import {
   setDescription,
 } from '@/features/transfer-form';
 import { selectAmountInput, selectDescription } from '@/features/transfer-form';
+import { beginTransferAttempt } from '@/features/transfer-submission';
 import { isValidAmountInput } from '@/shared/lib/money';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { AppText, Button } from '@/shared/ui/atoms';
@@ -58,7 +59,10 @@ export function TransferAmountForm() {
         <Button label="Back" variant="ghost" onPress={() => dispatch(backToSearch())} />
         <Button
           label="Review"
-          onPress={() => dispatch(goToConfirm())}
+          onPress={() => {
+            dispatch(beginTransferAttempt());
+            dispatch(goToConfirm());
+          }}
           disabled={!valid}
           style={styles.primary}
         />

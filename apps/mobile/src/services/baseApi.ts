@@ -17,6 +17,16 @@ import { getApiBaseUrl } from './config';
 import { subscribeFeedSse } from './sse';
 
 /**
+ * Transfer mutation argument including Redux-owned idempotency key.
+ */
+export interface CreateTransferArg {
+  /** Transfer request body. */
+  body: TransferRequest;
+  /** Idempotency key header value. */
+  idempotencyKey: string;
+}
+
+/**
  * RTK Query tag types for cache invalidation.
  */
 export const apiTags = ['Auth', 'Balance', 'Feed', 'Users', 'Transfers'] as const;
@@ -110,11 +120,14 @@ export const ficusApi = baseApi.injectEndpoints({
     /**
      * Creates a money transfer to another user.
      */
-    createTransfer: builder.mutation<TransferResponse, TransferRequest>({
-      query: (body) => ({
+    createTransfer: builder.mutation<TransferResponse, CreateTransferArg>({
+      query: ({ body, idempotencyKey }) => ({
         url: '/v1/transfers',
         method: 'POST',
         body,
+        headers: {
+          'Idempotency-Key': idempotencyKey,
+        },
       }),
       invalidatesTags: ['Balance', 'Feed', 'Transfers'],
     }),
