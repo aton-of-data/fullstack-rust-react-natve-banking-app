@@ -23,7 +23,9 @@ RTK Query `createTransfer` accepts `{ body, idempotencyKey }` and sets the heade
 
 - Retry after timeout sends identical key + body
 - 409 idempotency conflict blocks automatic retry (`retryable: false`)
-- 401 triggers existing auth listener logout flow
+- Idempotency key is preserved across Back→Review while an attempt is active
+- `beginTransferAttempt` is a no-op if a key already exists (prevents rotation after unknown outcomes)
+- 401 clears auth via `baseQueryWithAuth` (`clearCredentials`, form/submission reset, RTK cache reset)
 - Cache invalidation unchanged (`Balance`, `Feed`, `Transfers` tags)
 
 ## Alternatives considered

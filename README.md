@@ -128,14 +128,15 @@ Balances are funded from a system account with full ledger audit trail. **Never 
 
 ### Monorepo (frontend + tooling)
 
-| Command                 | Description                          |
-| ----------------------- | ------------------------------------ |
-| `pnpm lint`             | ESLint + JSDoc across workspace      |
-| `pnpm format:check`     | Prettier check                       |
-| `pnpm typecheck`        | TypeScript across packages           |
-| `pnpm test`             | Unit tests (Turbo)                   |
-| `pnpm test:performance` | k6 load test (requires k6 installed) |
-| `pnpm security:scan`    | gitleaks + trivy wrappers            |
+| Command                 | Description                                           |
+| ----------------------- | ----------------------------------------------------- |
+| `pnpm lint`             | ESLint + JSDoc across workspace                       |
+| `pnpm format:check`     | Prettier check                                        |
+| `pnpm typecheck`        | TypeScript across packages                            |
+| `pnpm test`             | Unit tests (Turbo)                                    |
+| `pnpm test:performance` | k6 load test (requires k6 installed)                  |
+| `pnpm security:scan`    | gitleaks + trivy wrappers                             |
+| `pnpm mobile:e2e:ios`   | Maestro mobile E2E (Java 17 + simulator; see ADR-013) |
 
 ### API (Rust)
 
@@ -156,6 +157,16 @@ Balances are funded from a system account with full ledger audit trail. **Never 
 | `make up-full` | Postgres + API container                              |
 | `make up-obs`  | Observability stack (OTel, Prometheus, Grafana, Loki) |
 | `make down`    | Stop all services                                     |
+
+## Mobile E2E (Maestro)
+
+Simulator flows for login, logout, transfer, and insufficient funds. Requires Java 17, Maestro CLI, booted simulator, running API + seeds, and Ficus open in Expo Go.
+
+```bash
+pnpm mobile:e2e:ios
+```
+
+See [`apps/mobile/e2e/README.md`](apps/mobile/e2e/README.md), [ADR-013](docs/ai/adr/013-maestro-mobile-e2e.md), and the [operations runbook](docs/operations/runbook.md#mobile-e2e-maestro).
 
 ## Testing Highlights
 

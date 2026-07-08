@@ -109,6 +109,44 @@ HAVING ab.balance_minor != COALESCE(SUM(CASE WHEN le.direction = 'credit' THEN l
 2. Check `JWT_EXPIRY_SECS`
 3. Verify clock skew on client devices
 
+## Mobile E2E (Maestro)
+
+Device flows for login, logout, transfer happy path, and insufficient funds. Details: `apps/mobile/e2e/README.md`, ADR-013.
+
+### Prerequisites
+
+1. Java 17 + Maestro CLI on `PATH`
+2. Booted iOS Simulator (or Android emulator)
+3. `make up` / Postgres healthy, `make db-migrate`, `make db-seed`
+4. API running (`make api-dev` or container)
+5. `pnpm mobile:dev` with Ficus already open in **Expo Go**
+
+```bash
+export JAVA_HOME="$(/usr/libexec/java_home -v 17)"
+pnpm mobile:e2e:ios
+```
+
+| Script                             | Purpose                                       |
+| ---------------------------------- | --------------------------------------------- |
+| `pnpm mobile:e2e`                  | Sequential suite (`01`–`06`)                  |
+| `pnpm mobile:e2e:ios` / `:android` | Platform pin                                  |
+| `pnpm mobile:e2e:record`           | Extra Maestro output under `e2e/screenshots/` |
+
+Exit `2` = SKIP (Maestro/Java missing). Suite reports: `apps/mobile/e2e/reports/latest.{json,md}`.
+
+Seed users: `alice` / `bob` / `charlie` / `password123`. Re-seed if alice balance cannot fund flow `05`.
+
+Curated docs screenshots: `apps/mobile/e2e/screenshots/01`–`06` (regenerate with `maestro test apps/mobile/e2e/flows/docs-capture.yaml --platform ios`).
+
+### Common Maestro failures
+
+| Symptom                       | Fix                                                    |
+| ----------------------------- | ------------------------------------------------------ |
+| Cannot find `"Send"`          | Use `"Send tab"` / `"Home tab"`                        |
+| Keyboard blocks Review        | Tap `"Send Money"` to dismiss decimal pad              |
+| Flows flake when parallelized | Always use the sequential runner                       |
+| Stuck mid-wizard              | `helpers/reset-to-login.yaml` or Back → Home → Log out |
+
 ## Performance Testing
 
 ```bash
