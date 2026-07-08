@@ -1,3 +1,11 @@
+//! Append-only audit event repository.
+//!
+//! **Tables:** `audit_events`.
+//!
+//! Inserts domain [`AuditEventDraft`] values after mapping through
+//! [`crate::mapper::audit_draft_to_active`]. Transfer-path audits may also be
+//! written directly by the executor inside/outside transactions.
+
 use async_trait::async_trait;
 use ficus_application::ports::AuditRepository;
 use ficus_domain::audit::AuditEventDraft;
@@ -8,7 +16,7 @@ use crate::entities::audit_events::Entity as AuditEvent;
 use crate::error::map_db_err;
 use crate::mapper::audit_draft_to_active;
 
-/// SeaORM-backed append-only audit repository.
+/// SeaORM-backed append-only audit repository (`audit_events`).
 pub struct PostgresAuditRepository {
     db: DatabaseConnection,
 }

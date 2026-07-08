@@ -1,4 +1,17 @@
 //! Test database seeding helpers.
+//!
+//! [`seed_test_users`] creates alice/bob/charlie with system-funded balances
+//! (transfer + ledger rows). [`set_account_balance`] is a **test escape hatch**
+//! that writes `account_balances` directly without ledger entries.
+//!
+//! # Bypass warning
+//!
+//! Both paths operate outside the live HTTP API. Prefer proving production
+//! money movement with [`crate::execute_transfer`] after seeding. Use
+//! [`set_account_balance`] only when a test needs a precise starting balance
+//! (e.g. concurrency caps) and understand that ledger vs projection may diverge
+//! until subsequent transfers write matching entries — conservation tests that
+//! sum projections after direct mutation must account for that.
 
 use chrono::Utc;
 use ficus_adapters_persistence::entities::{
@@ -41,13 +54,20 @@ const SEED_SPECS: &[SeedSpec] = &[
 /// Seeded users available to integration tests.
 #[derive(Debug, Clone)]
 pub struct TestUsers {
+    /// Funded user alice ($1,000.00).
     pub alice: TestUser,
+    /// Funded user bob ($500.00).
     pub bob: TestUser,
+    /// Funded user charlie ($250.00).
     pub charlie: TestUser,
+    /// Well-known system account UUID used for seed funding.
     pub system_account_id: Uuid,
 }
 
 /// Seeds alice, bob, and charlie with funded balances.
+///
+/// Creates users/accounts and funds via system debit/credit ledger pairs
+/// (auditable seed path). Still **not** the production transfer API.
 pub async fn seed_test_users(db: &DatabaseConnection) -> Result<TestUsers, sea_orm::DbErr> {
     let hasher = Argon2PasswordHasher;
     let system_id =
@@ -122,7 +142,21 @@ pub async fn seed_test_users(db: &DatabaseConnection) -> Result<TestUsers, sea_o
     })
 }
 
-/// Sets a user account balance directly (for deterministic concurrency tests).
+/// Sets a user account balance **directly** (bypasses ledger and transfer executor).
+///
+/// # When to use
+///
+/// Deterministic concurrency / funding-cap scenarios that need a precise
+/// starting projection (e.g. 50 × $1.00 against a $50.00 balance).
+///
+/// # When not to use
+///
+/// - Proving production funding or conservation end-to-end
+/// - Any scenario where ledger-derived balance must stay equal to the
+///   projection without an intentional mismatch
+///
+/// After this call, `account_balances.balance_minor` may disagree with
+/// [`crate::ledger_derived_balance`] until a compensating ledger update exists.
 pub async fn set_account_balance(
     db: &DatabaseConnection,
     account_id: Uuid,

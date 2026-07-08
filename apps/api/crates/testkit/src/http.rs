@@ -1,4 +1,8 @@
 //! HTTP helpers for full-stack API integration tests.
+//!
+//! Thin reqwest wrappers around auth, transfer, account, feed, and metrics
+//! endpoints. Prefer these over ad-hoc clients so status/header/leak assertions
+//! stay consistent across HTTP contract tests.
 
 use reqwest::{Client, StatusCode};
 use serde_json::Value;

@@ -1,4 +1,20 @@
-//! Verifies total funds are conserved across transfers.
+//! Money conservation: total projected balances never change on success or fail.
+//!
+//! # Risk guarded
+//! Creating/destroying money via unbalanced ledger updates or failed transfers
+//! that still mutate projections.
+//!
+//! # Invariant proven
+//! [`ficus_testkit::total_balance_minor`] is identical before/after single and
+//! sequenced user↔user transfers; insufficient-funds attempts leave totals,
+//! transfer counts, and orphan-ledger scans unchanged.
+//!
+//! # Amounts chosen
+//! Values well within seeded balances (e.g. 2_500 alice→bob); failure case uses
+//! 1_000_000 from charlie to force `InsufficientFunds` without touching money.
+//!
+//! # Failure meaning
+//! `before != after` means debit/credit application or rollback is incorrect.
 
 use ficus_domain::errors::DomainError;
 use ficus_testkit::{

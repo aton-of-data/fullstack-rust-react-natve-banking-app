@@ -1,4 +1,21 @@
-//! Mandatory idempotency scenarios for transfer retries.
+//! Transfer idempotency: safe retries and conflict on payload mismatch.
+//!
+//! # Risk guarded
+//! Double-charging on client retry, concurrent duplicate keys creating two
+//! transfers, and silently accepting a reused key with a different payload.
+//!
+//! # Invariant proven
+//! Same key + same fingerprint returns the original transfer without a second
+//! debit; same key + different amount/recipient → `IdempotencyConflict`;
+//! invalid key format rejected; concurrent duplicates collapse to one id.
+//!
+//! # Amounts chosen
+//! Small USD minor amounts (500–2000) within seeded alice balances so success
+//! paths are not obscured by insufficient-funds noise.
+//!
+//! # Failure meaning
+//! Divergent transfer ids, conserved total breaking on replay, or accepting a
+//! mismatched payload means the idempotency store/fingerprint check is wrong.
 
 use ficus_domain::errors::DomainError;
 use ficus_domain::idempotency::request_fingerprint;

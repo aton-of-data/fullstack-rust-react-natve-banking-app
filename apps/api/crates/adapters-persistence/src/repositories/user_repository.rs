@@ -1,3 +1,12 @@
+//! User lookup and username-prefix search repository.
+//!
+//! **Tables:** `users`.
+//!
+//! Returns application [`UserRecord`](ficus_application::ports::UserRecord) values
+//! including `password_hash` for auth verification. Callers must never log or
+//! serialize the hash to clients. This repository does not create users (seed
+//! / migrate paths own inserts).
+
 use async_trait::async_trait;
 use ficus_application::ports::{Page, UserRecord, UserRepository};
 use ficus_domain::errors::DomainError;
@@ -10,7 +19,7 @@ use crate::entities::users::{self, Entity as User};
 use crate::error::map_db_err;
 use crate::mapper::user_to_record;
 
-/// SeaORM-backed user repository.
+/// SeaORM-backed user repository (`users`).
 pub struct PostgresUserRepository {
     db: DatabaseConnection,
 }

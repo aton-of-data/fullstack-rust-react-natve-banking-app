@@ -1,3 +1,11 @@
+//! Account and ledger query repository.
+//!
+//! **Tables:** `accounts`, `account_balances`, `ledger_entries`.
+//!
+//! Resolves a user's account id, reads balance projections, and pages ledger
+//! history (newest-first cursor). Does not mutate balances — the transfer
+//! executor owns money writes.
+
 use async_trait::async_trait;
 use ficus_application::ports::{AccountRepository, BalanceRecord, LedgerEntryRecord, Page};
 use ficus_domain::errors::DomainError;
@@ -12,7 +20,7 @@ use crate::entities::ledger_entries::{self, Entity as LedgerEntry};
 use crate::error::map_db_err;
 use crate::mapper::{balance_to_record, decode_cursor, encode_cursor, ledger_entry_to_record};
 
-/// SeaORM-backed account repository.
+/// SeaORM-backed account repository (`accounts`, `account_balances`, `ledger_entries`).
 pub struct PostgresAccountRepository {
     db: DatabaseConnection,
 }

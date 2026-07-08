@@ -1,21 +1,41 @@
+//! Environment-backed application configuration.
+//!
+//! Loads host/port, database URLs, JWT settings, CORS, rate limits, and
+//! optional OpenTelemetry / metrics auth flags. Required secrets (`DATABASE_URL`,
+//! `JWT_SECRET`) must come from the environment — never hard-code them here.
+
 use std::env;
 
 /// Application configuration loaded from environment variables.
 #[derive(Debug, Clone)]
 pub struct AppConfig {
+    /// Bind host for the HTTP listener (default `0.0.0.0`).
     pub host: String,
+    /// Bind port for the HTTP listener (default `8080`).
     pub port: u16,
+    /// Primary Postgres URL used by the API process.
     pub database_url: String,
+    /// Postgres URL used by migrate/seed (falls back to [`Self::database_url`]).
     pub migration_database_url: String,
+    /// HMAC secret for JWT access tokens (min 32 characters).
     pub jwt_secret: String,
+    /// Access token lifetime in seconds (default `3600`).
     pub jwt_expiry_secs: u64,
+    /// Deployment environment label (e.g. `development`, `production`).
     pub environment: String,
+    /// Allowed CORS origin list.
     pub cors_origins: Vec<String>,
+    /// Login attempts allowed per client per minute.
     pub login_rate_limit_per_min: u32,
+    /// Transfer attempts allowed per client per minute.
     pub transfer_rate_limit_per_min: u32,
+    /// Optional OTLP exporter endpoint (collector sidecar when set).
     pub otel_endpoint: Option<String>,
+    /// OpenTelemetry service name (default `ficus-api`).
     pub otel_service_name: String,
+    /// Optional bearer token required for `/metrics`.
     pub metrics_auth_token: Option<String>,
+    /// When true, trust proxy headers for client IP / rate limiting.
     pub trust_proxy_headers: bool,
 }
 
@@ -84,6 +104,7 @@ impl AppConfig {
         })
     }
 
+    /// Returns `host:port` for binding the HTTP listener.
     pub fn listen_addr(&self) -> String {
         format!("{}:{}", self.host, self.port)
     }

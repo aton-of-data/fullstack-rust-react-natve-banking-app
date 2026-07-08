@@ -1,4 +1,50 @@
-//! Ficus HTTP adapters — Axum router, middleware, and thin handlers.
+//! HTTP adapter layer for the Ficus API (Axum).
+//!
+//! This crate translates HTTP requests into application-service calls and maps
+//! domain outcomes to HTTP status codes and JSON bodies. Handlers stay thin:
+//! they parse headers and bodies, enforce transport concerns (auth, idempotency
+//! keys, rate limits), and delegate money-movement and auth use cases to
+//! `ficus-application`.
+//!
+//! # Architectural role
+//!
+//! `ficus-adapters-http` sits at the inbound edge of the hexagonal backend. It
+//! may depend on `ficus-application` (and transitively `ficus-domain` types for
+//! error mapping) and on Axum / Tower HTTP middleware. It must **not** own
+//! financial invariants such as double-entry ledger balancing, balance
+//! deduction rules, idempotent transfer persistence, or isolation/locking
+//! strategy — those live in domain and persistence.
+//!
+//! # What this crate may depend on
+//!
+//! - `ficus-application` services, ports, and DTOs
+//! - `ficus-domain` errors and value types used at the boundary
+//! - Axum, Tower, `tower-http`, OpenAPI (`utoipa`), metrics exporters
+//!
+//! # What this crate must not do
+//!
+//! - Open database transactions or touch SeaORM entities
+//! - Implement transfer ledger writes, fingerprinting, or balance mutations
+//! - Store passwords or log secrets (tokens, passwords, raw bearer headers)
+//!
+//! # Neighboring crates
+//!
+//! - **Upstream callers:** `ficus-infrastructure` (composition root) builds
+//!   [`AppState`] and serves [`create_router`].
+//! - **Downstream:** application services orchestrate use cases; persistence
+//!   adapters perform transactional money movement.
+//!
+//! # Surface area
+//!
+//! - [`create_router`] — full `/v1` API, health, metrics, optional Swagger UI
+//! - [`AppState`] — shared service handles and runtime knobs
+//! - [`ApiError`] / [`ErrorBody`] — safe client-facing error mapping
+//! - Middleware: JWT auth, request/trace IDs, rate limits, metrics auth, HTTP metrics
+//! - Handlers: auth, users, accounts, transfers, feed, health
+
+#![warn(missing_docs)]
+#![warn(rustdoc::broken_intra_doc_links)]
+#![warn(rustdoc::bare_urls)]
 
 mod error;
 mod handlers;
@@ -36,10 +82,39 @@ use crate::middleware::rate_limit::RateLimiter;
 use crate::middleware::{request_id_middleware, trace_metrics_middleware};
 use crate::state::AppState as State;
 
-/// Maximum JSON request body size (1 MiB).
+/// Maximum accepted HTTP request body size (1 MiB).
+///
+/// Applied globally via [`RequestBodyLimitLayer`]. Oversized JSON bodies are
+/// rejected before handlers run.
 pub const MAX_BODY_BYTES: usize = 1024 * 1024;
 
-/// Builds the full Axum router with middleware, routes, and OpenAPI documentation.
+/// Builds the full Axum router with middleware, `/v1` routes, health, and metrics.
+///
+/// # Layers and routes (outer → inner)
+///
+/// Global layers (applied to every request):
+/// - Request/trace ID injection (`request_id_middleware`)
+/// - HTTP request metrics (`trace_metrics_middleware`)
+/// - Tower `TraceLayer`
+/// - CORS from private `cors_layer`
+/// - Body size limit ([`MAX_BODY_BYTES`])
+/// - Security headers (`X-Content-Type-Options`, `X-Frame-Options`, etc.)
+///
+/// Route groups:
+/// - `GET /health/live`, `GET /health/ready` — unauthenticated probes
+/// - `GET /metrics` — Prometheus scrape; gated by [`require_metrics_auth`]
+/// - `/v1/*` — versioned API; login is public (rate-limited); other routes
+///   require JWT via [`require_auth`]
+/// - `/api-docs` + OpenAPI JSON — only when `environment` is `development` or
+///   `test`
+///
+/// Transfer and login routes attach additional per-route rate-limit layers.
+///
+/// # Responsibilities
+///
+/// Initializes Prometheus metrics (best-effort), wires rate limiters from
+/// [`AppState`] knobs, and returns a stateful [`Router`]. Callers from the
+/// infrastructure crate bind this router to a listener.
 pub fn create_router(state: State) -> Router {
     if let Err(err) = init_metrics() {
         tracing::error!(error = %err, "failed to initialize Prometheus metrics");
@@ -119,6 +194,12 @@ pub fn create_router(state: State) -> Router {
         .layer(from_fn(request_id_middleware))
 }
 
+/// Builds a CORS layer for configured browser origins.
+///
+/// Allows `GET`, `POST`, and `OPTIONS` with any request headers. When
+/// `origins` is empty or contains no parseable values, falls back to
+/// `http://localhost` so local clients can call the API. Production must pass
+/// explicit allowed origin strings via [`AppState::cors_origins`].
 fn cors_layer(origins: &[String]) -> CorsLayer {
     let layer = CorsLayer::new()
         .allow_methods([

@@ -1,4 +1,15 @@
-//! SeaORM entity models for Ficus persistence.
+//! SeaORM entity models for Ficus PostgreSQL tables.
+//!
+//! These types are an **internal** persistence concern. Callers outside this
+//! crate should use application port records produced by [`crate::mapper`],
+//! not `entities::*::Model` values.
+//!
+//! Generated SeaORM fields, `Column` enums, and `Relation` variants are
+//! intentionally under-documented; see the crate root missing-docs policy.
+
+// SeaORM DeriveEntityModel expands many public fields/associations; documenting
+// each field would add noise without improving the adapter boundary.
+#![allow(missing_docs)]
 
 pub mod account_balances;
 pub mod accounts;
@@ -8,6 +19,7 @@ pub mod ledger_entries;
 pub mod transfers;
 pub mod users;
 
+/// Convenient re-exports of SeaORM `Entity` types used inside this crate.
 pub mod prelude {
     pub use super::account_balances::Entity as AccountBalance;
     pub use super::accounts::Entity as Account;

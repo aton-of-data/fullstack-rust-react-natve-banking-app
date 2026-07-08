@@ -1,4 +1,21 @@
 //! Maps between persistence models and application/domain types.
+//!
+//! # Boundary rule (ORM must not leak)
+//!
+//! SeaORM `entities::*::Model` values stay inside this crate. Public ports and
+//! application use cases consume **records** (`UserRecord`, `TransferRecord`,
+//! `FeedItem`, …) and domain types (`TransferStatus`, `AuditEventDraft`).
+//! Mapping helpers here are the only supported translation layer.
+//!
+//! # Mapping rules
+//!
+//! - Timestamps: SeaORM `DateTimeWithTimeZone` → `chrono::DateTime<Utc>`.
+//! - Transfer status: domain enum ↔ DB strings `"completed"` / `"declined"`.
+//! - Feed cursor: `"{rfc3339}|{uuid}"` via [`encode_cursor`] / [`decode_cursor`].
+//! - Amounts in feed items are stringified minor units for JSON clients.
+//! - Audit metadata: domain `BTreeMap<String, String>` → JSON object for storage.
+//! - Username joins for transfer/feed records happen in repositories; mappers
+//!   only assemble the final DTO once usernames are known.
 
 use chrono::{DateTime, Utc};
 use ficus_application::ports::{
@@ -16,11 +33,17 @@ use crate::entities::{
 pub const FEED_NOTIFY_CHANNEL: &str = "ficus_feed_events";
 
 /// Encodes a cursor from timestamp and identifier.
+///
+/// Format: `{created_at.to_rfc3339()}|{id}`. Used for transfer feed and ledger
+/// pagination (newest-first scans).
 pub fn encode_cursor(created_at: DateTime<Utc>, id: uuid::Uuid) -> String {
     format!("{}|{}", created_at.to_rfc3339(), id)
 }
 
 /// Decodes a pagination cursor into timestamp and identifier.
+///
+/// Rejects malformed strings, bad timestamps, or non-UUID ids with
+/// [`DomainError::Validation`].
 pub fn decode_cursor(cursor: &str) -> Result<(DateTime<Utc>, uuid::Uuid), DomainError> {
     let (ts, id) = cursor
         .split_once('|')
@@ -33,6 +56,7 @@ pub fn decode_cursor(cursor: &str) -> Result<(DateTime<Utc>, uuid::Uuid), Domain
     Ok((created_at, id))
 }
 
+/// Converts a SeaORM timestamptz column to UTC.
 fn to_utc(ts: DateTimeWithTimeZone) -> DateTime<Utc> {
     ts.with_timezone(&Utc)
 }
@@ -46,6 +70,8 @@ pub fn transfer_status_to_db(status: TransferStatus) -> &'static str {
 }
 
 /// Maps a database transfer status string to the domain enum.
+///
+/// Unknown values become [`DomainError::Validation`].
 pub fn transfer_status_from_db(value: &str) -> Result<TransferStatus, DomainError> {
     match value {
         "completed" => Ok(TransferStatus::Completed),
@@ -56,7 +82,7 @@ pub fn transfer_status_from_db(value: &str) -> Result<TransferStatus, DomainErro
     }
 }
 
-/// Maps a user entity to an application record.
+/// Maps a user entity to an application record (including password hash).
 pub fn user_to_record(model: users::Model) -> UserRecord {
     UserRecord {
         id: model.id,
@@ -74,7 +100,7 @@ pub fn balance_to_record(model: account_balances::Model) -> BalanceRecord {
     }
 }
 
-/// Maps a transfer entity and usernames to an application record.
+/// Maps a transfer entity and joined usernames to an application record.
 pub fn transfer_to_record(
     model: transfers::Model,
     sender_username: String,
@@ -96,7 +122,7 @@ pub fn transfer_to_record(
     })
 }
 
-/// Maps a transfer entity to a public feed item.
+/// Maps a transfer entity to a public feed item (usernames already resolved).
 pub fn transfer_to_feed_item(
     model: transfers::Model,
     sender_username: String,
@@ -143,6 +169,9 @@ pub fn audit_metadata_to_json(
 }
 
 /// Builds an audit event active model from a domain draft.
+///
+/// Assigns a new event UUID; ORM types never leave this function except as a
+/// SeaORM insert target inside repositories/executor.
 pub fn audit_draft_to_active(
     draft: ficus_domain::audit::AuditEventDraft,
 ) -> audit_events::ActiveModel {

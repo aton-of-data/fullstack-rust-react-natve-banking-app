@@ -1,4 +1,15 @@
 //! Shared balance and ledger assertion helpers for integration tests.
+//!
+//! These helpers express the financial **invariants** exercised by the
+//! concurrency, conservation, and reconciliation suites:
+//!
+//! - [`negative_balances`] — no projection may be strictly negative.
+//! - [`total_balance_minor`] — sum of all balance projections (conservation of
+//!   system money including the system account).
+//! - [`orphan_ledger_entries`] — every ledger row must reference a
+//!   **completed** transfer (no partial / rolled-back leftovers).
+//! - [`reconcile_all_accounts`] / [`ledger_derived_balance`] — non-system
+//!   projections must equal append-only ledger reconstruction.
 
 use ficus_adapters_persistence::entities::{account_balances, accounts, ledger_entries, transfers};
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
@@ -14,6 +25,10 @@ pub fn signed_ledger_amount(direction: &str, amount_minor: i64) -> i64 {
 }
 
 /// Sums all account balance projections in minor units.
+///
+/// Includes the system account. Successful user↔user transfers must leave this
+/// total unchanged (money conserved). Failure to conserve means a bug in
+/// debit/credit application or a race that overwrote balances.
 pub async fn total_balance_minor(db: &DatabaseConnection) -> Result<i64, sea_orm::DbErr> {
     let rows = account_balances::Entity::find().all(db).await?;
     Ok(rows.iter().map(|row| row.balance_minor).sum())
@@ -35,6 +50,10 @@ pub async fn ledger_derived_balance(
 }
 
 /// Returns balances that are strictly negative.
+///
+/// Invariant: production transfers must never leave a negative projection.
+/// A non-empty result means locking / insufficient-funds checks failed under
+/// concurrency or a bypass helper left an invalid state.
 pub async fn negative_balances(
     db: &DatabaseConnection,
 ) -> Result<Vec<(Uuid, i64)>, sea_orm::DbErr> {
@@ -61,6 +80,9 @@ pub async fn count_all_transfers(db: &DatabaseConnection) -> Result<u64, sea_orm
 }
 
 /// Verifies every ledger entry references a completed transfer.
+///
+/// Invariant: failed/rolled-back transfers must not leave ledger rows; entries
+/// pointing at missing or non-completed transfers are orphans (partial state).
 pub async fn orphan_ledger_entries(db: &DatabaseConnection) -> Result<Vec<Uuid>, sea_orm::DbErr> {
     let entries = ledger_entries::Entity::find().all(db).await?;
     let mut orphans = Vec::new();
@@ -91,6 +113,11 @@ pub struct ReconciliationMismatch {
 }
 
 /// Reconciles all account balance projections against ledger history.
+///
+/// Skips the system account (seed funding may leave intentional projection
+/// differences vs a full double-entry history depending on seed path). For
+/// user accounts, any mismatch means the projection and append-only ledger
+/// diverged — a critical money-integrity failure.
 pub async fn reconcile_all_accounts(
     db: &DatabaseConnection,
 ) -> Result<Vec<ReconciliationMismatch>, sea_orm::DbErr> {

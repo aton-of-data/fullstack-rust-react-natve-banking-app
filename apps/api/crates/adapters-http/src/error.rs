@@ -1,3 +1,10 @@
+//! HTTP error mapping for Axum handlers.
+//!
+//! Converts [`DomainError`] and transport failures into stable JSON
+//! [`ErrorBody`] values. Client messages must never include passwords, JWTs,
+//! raw idempotency keys, or SQL detail. Status mapping lives in
+//! `ApiError::status` / private `domain_status`.
+
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
@@ -8,23 +15,32 @@ use serde::Serialize;
 use thiserror::Error;
 
 /// HTTP-layer API error with status mapping.
+///
+/// Prefer returning mapped domain errors for business failures. Use
+/// [`ApiError::Internal`] only when the failure must not leak details.
 #[derive(Debug, Error)]
 pub enum ApiError {
+    /// Domain/business error — status derived from private `domain_status`.
     #[error("{0}")]
     Domain(#[from] DomainError),
 
+    /// Missing or invalid bearer authentication.
     #[error("unauthorized")]
     Unauthorized,
 
+    /// Transfer requested without an `Idempotency-Key` header (HTTP 400).
     #[error("missing idempotency key")]
     MissingIdempotencyKey,
 
+    /// Login or transfer rate limit exceeded (HTTP 429).
     #[error("rate limit exceeded")]
     RateLimited,
 
+    /// Request validation failure at the HTTP boundary (HTTP 400).
     #[error("validation error: {0}")]
     Validation(String),
 
+    /// Unexpected internal failure; message is generic (HTTP 500).
     #[error("internal server error")]
     Internal,
 }
@@ -39,6 +55,7 @@ pub struct ErrorBody {
 }
 
 impl ApiError {
+    /// Maps this error to an HTTP status code.
     fn status(&self) -> StatusCode {
         match self {
             ApiError::Domain(err) => domain_status(err),
@@ -50,6 +67,7 @@ impl ApiError {
         }
     }
 
+    /// Builds a client-safe JSON error body (no secrets or SQL).
     fn body(&self) -> ErrorBody {
         match self {
             ApiError::Domain(DomainError::InvalidCredentials) => ErrorBody {
@@ -124,6 +142,7 @@ impl ApiError {
     }
 }
 
+/// Maps a domain error to the HTTP status used by the API contract.
 fn domain_status(err: &DomainError) -> StatusCode {
     match err {
         DomainError::InvalidCredentials => StatusCode::UNAUTHORIZED,

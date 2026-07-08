@@ -1,3 +1,11 @@
+//! Transfer history and public feed query repository.
+//!
+//! **Tables:** `transfers`, `users` (username joins).
+//!
+//! Reads completed transfers for the live feed and look-ups by id. Inserts and
+//! status transitions for money movement happen only in
+//! [`crate::executor::PostgresTransferExecutor`].
+
 use async_trait::async_trait;
 use ficus_application::ports::{FeedItem, Page, TransferRecord, TransferRepository};
 use ficus_domain::errors::DomainError;
@@ -14,7 +22,7 @@ use crate::mapper::{
     decode_cursor, encode_cursor, transfer_status_to_db, transfer_to_feed_item, transfer_to_record,
 };
 
-/// SeaORM-backed transfer repository.
+/// SeaORM-backed transfer repository (`transfers` + `users` username joins).
 pub struct PostgresTransferRepository {
     db: DatabaseConnection,
 }

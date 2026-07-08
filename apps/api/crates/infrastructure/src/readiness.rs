@@ -1,3 +1,8 @@
+//! Database readiness probe for HTTP health/ready endpoints.
+//!
+//! Implements [`ficus_adapters_http::ReadinessCheck`] by pinging the SeaORM
+//! connection so orchestrators can distinguish "process up" from "DB reachable".
+
 use async_trait::async_trait;
 use ficus_adapters_http::ReadinessCheck;
 use sea_orm::DatabaseConnection;
@@ -8,6 +13,7 @@ pub struct DbReadiness {
 }
 
 impl DbReadiness {
+    /// Wraps an existing SeaORM connection for readiness checks.
     pub fn new(db: DatabaseConnection) -> Self {
         Self { db }
     }

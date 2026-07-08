@@ -1,15 +1,26 @@
+//! Process health probe HTTP handlers.
+//!
+//! Unauthenticated endpoints used by orchestrators and load balancers.
+//! Liveness only checks that the process responds; readiness optionally
+//! consults [`crate::ReadinessCheck`] (typically database reachability).
+
 use axum::{extract::State, http::StatusCode, Json};
 use serde::Serialize;
 
 use crate::state::AppState;
 
-/// Liveness probe response body.
+/// Liveness / readiness JSON body.
 #[derive(Debug, Serialize, utoipa::ToSchema)]
 pub struct HealthResponse {
+    /// `"ok"` when the probe succeeds; `"not_ready"` for failed readiness.
     pub status: &'static str,
 }
 
-/// Returns 200 when the process is running.
+/// `GET /health/live` — liveness probe.
+///
+/// # Auth
+///
+/// None. Always returns 200 with `{ "status": "ok" }` while the process is up.
 #[utoipa::path(
     get,
     path = "/health/live",
@@ -20,7 +31,13 @@ pub async fn live() -> Json<HealthResponse> {
     Json(HealthResponse { status: "ok" })
 }
 
-/// Returns 200 when dependencies are ready, 503 otherwise.
+/// `GET /health/ready` — readiness probe.
+///
+/// # Auth
+///
+/// None. Returns 200 when dependencies are ready (or when no
+/// [`crate::ReadinessCheck`] is configured). Returns 503 with
+/// `"not_ready"` when the check reports unavailable.
 #[utoipa::path(
     get,
     path = "/health/ready",

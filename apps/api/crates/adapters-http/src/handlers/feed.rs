@@ -1,3 +1,10 @@
+//! Global transaction feed HTTP handlers.
+//!
+//! Exposes a paginated historical feed and a Server-Sent Events (SSE) live
+//! stream of completed transfers. Feed data comes from
+//! [`ficus_application::FeedService`]; this module handles HTTP/SSE framing
+//! and connection metrics only.
+
 use std::convert::Infallible;
 use std::pin::Pin;
 use std::task::{Context, Poll};
@@ -27,11 +34,20 @@ use crate::state::AppState;
 /// Query parameters for paginated feed listing.
 #[derive(Debug, Deserialize, utoipa::IntoParams, utoipa::ToSchema)]
 pub struct FeedQuery {
-    /// Opaque pagination cursor.
+    /// Opaque pagination cursor from a previous page's `next_cursor`.
     pub cursor: Option<String>,
 }
 
-/// Returns a paginated global transaction feed.
+/// `GET /v1/feed` — paginated global transaction feed.
+///
+/// # Auth
+///
+/// Requires Bearer JWT. The feed is global (not filtered to the caller); auth
+/// gates access but does not scope the list to the user's transfers.
+///
+/// # Errors
+///
+/// 401 when unauthenticated.
 #[utoipa::path(
     get,
     path = "/v1/feed",
@@ -60,7 +76,23 @@ pub async fn list_feed(
     }))
 }
 
-/// Streams live feed events over Server-Sent Events.
+/// `GET /v1/feed/stream` — live feed events over Server-Sent Events.
+///
+/// # Auth
+///
+/// Requires Bearer JWT. Optional `Last-Event-Id` requests a replay cursor so
+/// clients can catch up before receiving live broadcast events.
+///
+/// # Behavior
+///
+/// Returns `text/event-stream` with `transfer` events (JSON [`FeedItemResponse`])
+/// and periodic keep-alive comments. Active connections increment
+/// `ficus_sse_connections_active` and decrement it when the stream is dropped.
+///
+/// # Errors
+///
+/// 401 when unauthenticated; application errors from replay listing map via
+/// [`ApiError`].
 #[utoipa::path(
     get,
     path = "/v1/feed/stream",
@@ -117,6 +149,7 @@ pub async fn stream_feed(
     ))
 }
 
+/// Builds an SSE `transfer` event from a feed item, or skips on serialize failure.
 fn feed_event(item: &FeedItemResponse) -> Option<Event> {
     match Event::default()
         .id(item.transfer_id.to_string())
@@ -131,7 +164,7 @@ fn feed_event(item: &FeedItemResponse) -> Option<Event> {
     }
 }
 
-/// Decrements the SSE gauge when the stream is dropped.
+/// Decrements the SSE connection gauge when the stream is dropped.
 struct SseConnectionGuard;
 
 impl Drop for SseConnectionGuard {
@@ -140,6 +173,7 @@ impl Drop for SseConnectionGuard {
     }
 }
 
+/// Stream wrapper that owns [`SseConnectionGuard`] for the connection lifetime.
 struct GuardedSseStream<S> {
     inner: S,
     _guard: SseConnectionGuard,

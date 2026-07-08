@@ -1,4 +1,63 @@
 //! Atomic PostgreSQL transfer executor with double-entry ledger writes.
+//!
+//! # Concurrency model (not SERIALIZABLE)
+//!
+//! Transactions use **`IsolationLevel::ReadCommitted`** with **`AccessMode::ReadWrite`**.
+//! Correctness under concurrency relies on:
+//!
+//! 1. **`pg_advisory_xact_lock(hashtext(...))`** — scopes concurrent retries for the
+//!    same `(sender_user_id, idempotency_key)` pair for the life of the transaction.
+//! 2. **`SELECT … FOR UPDATE`** on `account_balances` rows — taken in
+//!    **deterministic UUID order** (lower account id first) so A→B and B→A cannot
+//!    deadlock on row locks.
+//!
+//! Despite retry metric/log wording that says “serialization”, the isolation level
+//! is **not** PostgreSQL `SERIALIZABLE`. Retries cover retryable DB errors that
+//! surface as domain `Validation` messages containing `"serialization"` or
+//! `"deadlock"` (private helper `is_retryable_domain`).
+//!
+//! # Transaction lifecycle
+//!
+//! 1. Resolve sender/recipient users and accounts **outside** the money txn
+//!    (read-only lookups on the shared pool connection).
+//! 2. `begin_with_config(ReadCommitted, ReadWrite)`.
+//! 3. Private `execute_in_transaction` — locks, ledger, balances, idempotency, audits.
+//! 4. On success: **`commit`**. On any error: **`rollback`**.
+//! 5. If the error was [`DomainError::InsufficientFunds`], write a
+//!    `TransferDeclined` audit on a **fresh** connection after rollback
+//!    (private `record_declined_transfer_audit`).
+//!
+//! # Insufficient funds
+//!
+//! When the locked sender balance is below the transfer amount, the in-txn path
+//! returns `InsufficientFunds`. The outer handler rolls the transaction back, so
+//! **no** transfer row, ledger entries, balance updates, or idempotency row are
+//! persisted. Declined audit is appended **outside** the aborted transaction.
+//!
+//! # Success path (single committed transaction)
+//!
+//! - Optional early return of a stored idempotency response (same fingerprint).
+//! - `TransferRequested` audit (in-txn).
+//! - Lock both balances (UUID-ordered `FOR UPDATE`).
+//! - Insert **one** `transfers` row (`completed`).
+//! - Insert **exactly two** `ledger_entries` (debit sender, credit recipient) from
+//!   domain `build_transfer_entries`.
+//! - Update both `account_balances` projections (DB check constraint mapped via
+//!   [`crate::error::map_balance_constraint`]).
+//! - Insert `idempotency_requests` with serialized [`TransferRecord`] JSON.
+//! - `TransferCompleted` audit (in-txn).
+//!
+//! # Serialization / deadlock retries
+//!
+//! Private `execute_with_retry` retries up to `MAX_SERIALIZATION_RETRIES` (`5`) when
+//! `is_retryable_domain` is true, sleeping with `jitter_backoff` between
+//! attempts and incrementing `ficus_transfer_serialization_retry_total`.
+//!
+//! # Feed publication
+//!
+//! **Not performed here.** Application use cases publish to
+//! [`crate::feed::InMemoryFeedBroadcaster`] only after a successful
+//! `execute_transfer` return. This executor never NOTIFYs or broadcasts feed items.
 
 use std::collections::BTreeMap;
 use std::str::FromStr;
@@ -33,23 +92,48 @@ use crate::entities::users::{self, Entity as User};
 use crate::error::{is_retryable_db_error, map_balance_constraint, map_db_err};
 use crate::mapper::{audit_draft_to_active, transfer_status_to_db, transfer_to_record};
 
+/// Maximum retry attempts after a retryable DB conflict/deadlock during transfer.
+///
+/// Each attempt opens a new ReadCommitted transaction. Exhaustion returns the
+/// last error to the caller.
 const MAX_SERIALIZATION_RETRIES: u32 = 5;
+
+/// Base delay (ms) for exponential backoff before the first retry sleep.
 const BASE_RETRY_DELAY_MS: u64 = 25;
+
+/// Cap (ms) on the exponential portion of [`jitter_backoff`] (before jitter).
 const MAX_RETRY_DELAY_MS: u64 = 250;
 
+/// Borrowed inputs for a single transfer execution (and its retries).
+///
+/// Built once in [`TransferExecutor::execute_transfer`] and passed through
+/// [`PostgresTransferExecutor::execute_with_retry`] so retries do not re-allocate
+/// request strings.
 struct TransferExecutionRequest<'a> {
+    /// Authenticated sender user id.
     sender_user_id: Uuid,
+    /// Recipient lookup key (`users.username`).
     recipient_username: &'a str,
+    /// Transfer amount in currency minor units.
     amount_minor: i64,
+    /// ISO-like currency code validated via domain [`Currency`].
     currency_code: &'a str,
+    /// Optional transfer note persisted on the transfer row.
     description: Option<&'a str>,
+    /// Client idempotency key scoped to the sender.
     idempotency_key: &'a str,
+    /// Hash of the request body used to detect conflicting retries.
     fingerprint: &'a str,
+    /// Correlation id stored on audit events.
     request_id: &'a str,
+    /// Distributed trace id stored on audit events.
     trace_id: &'a str,
 }
 
 /// Executes transfers inside PostgreSQL transactions with row-level locking.
+///
+/// Implements the application [`TransferExecutor`] port. See the module docs for
+/// isolation, locking, success/failure paths, retries, and feed boundaries.
 pub struct PostgresTransferExecutor {
     db: DatabaseConnection,
 }
@@ -60,6 +144,11 @@ impl PostgresTransferExecutor {
         Self { db }
     }
 
+    /// Persists `TransferDeclined` **outside** any aborted transfer transaction.
+    ///
+    /// Called only after rollback when the in-txn path returned
+    /// [`DomainError::InsufficientFunds`]. Failures to write the audit are logged
+    /// and swallowed so the original domain error is still returned to the caller.
     async fn record_declined_transfer_audit(
         &self,
         request: &TransferExecutionRequest<'_>,
@@ -98,6 +187,10 @@ impl PostgresTransferExecutor {
         }
     }
 
+    /// Retries [`Self::try_execute_transfer`] on retryable conflict/deadlock errors.
+    ///
+    /// Up to [`MAX_SERIALIZATION_RETRIES`] retries; sleeps with [`jitter_backoff`]
+    /// and increments `ficus_transfer_serialization_retry_total` per retry.
     async fn execute_with_retry(
         &self,
         request: TransferExecutionRequest<'_>,
@@ -121,6 +214,10 @@ impl PostgresTransferExecutor {
         }
     }
 
+    /// One attempt: resolve parties, open a ReadCommitted txn, commit or rollback.
+    ///
+    /// On `InsufficientFunds` after rollback, records declined audit outside the
+    /// aborted transaction via [`Self::record_declined_transfer_audit`].
     async fn try_execute_transfer(
         &self,
         request: &TransferExecutionRequest<'_>,
@@ -207,6 +304,15 @@ impl PostgresTransferExecutor {
         }
     }
 
+    /// Core money movement inside an open ReadCommitted transaction.
+    ///
+    /// Order of operations: advisory idempotency lock → load/compare stored
+    /// response → request audit → UUID-ordered balance `FOR UPDATE` → funds
+    /// check → transfer + two ledger rows + balance updates → store idempotency
+    /// response → completed audit.
+    ///
+    /// Returning `InsufficientFunds` leaves the txn open for the caller to
+    /// rollback; no transfer/ledger/idempotency writes occur after that check.
     #[allow(clippy::too_many_arguments)]
     async fn execute_in_transaction(
         &self,
@@ -417,6 +523,9 @@ impl PostgresTransferExecutor {
 
 #[async_trait]
 impl TransferExecutor for PostgresTransferExecutor {
+    /// Runs a transfer with ReadCommitted locking and serialization/deadlock retries.
+    ///
+    /// Does **not** publish feed events; callers must publish after `Ok`.
     #[allow(clippy::too_many_arguments)]
     async fn execute_transfer(
         &self,
@@ -445,6 +554,11 @@ impl TransferExecutor for PostgresTransferExecutor {
     }
 }
 
+/// Takes a transaction-scoped advisory lock keyed by `sender_user_id:idempotency_key`.
+///
+/// Uses `SELECT pg_advisory_xact_lock(hashtext(...))` so concurrent retries for the
+/// same logical request serialize until the holding transaction ends (commit or
+/// rollback). The lock does not replace fingerprint conflict checks.
 async fn lock_idempotency_scope(
     txn: &DatabaseTransaction,
     sender_user_id: Uuid,
@@ -459,6 +573,10 @@ async fn lock_idempotency_scope(
     Ok(())
 }
 
+/// Locks both account balance rows with `FOR UPDATE` in ascending UUID order.
+///
+/// Ordering by account id (not sender-then-recipient) prevents classic A↔B
+/// deadlocks when two transfers touch the same pair in opposite directions.
 async fn lock_balances_in_order(
     txn: &DatabaseTransaction,
     first_account_id: Uuid,
@@ -482,6 +600,7 @@ async fn lock_balances_in_order(
     Ok(())
 }
 
+/// Inserts an audit event row inside the open transfer transaction.
 async fn append_audit(
     txn: &DatabaseTransaction,
     draft: AuditEventDraft,
@@ -493,6 +612,11 @@ async fn append_audit(
     Ok(())
 }
 
+/// Maps in-transaction SeaORM errors to domain errors, marking retryable ones.
+///
+/// Retryable DB errors become `Validation("serialization failure: …")` so
+/// [`is_retryable_domain`] can trigger [`execute_with_retry`]. Balance check
+/// constraint violations map to [`DomainError::NegativeBalance`].
 fn map_txn_err(err: sea_orm::DbErr) -> DomainError {
     if is_retryable_db_error(&err) {
         return DomainError::Validation(format!("serialization failure: {err}"));
@@ -503,6 +627,7 @@ fn map_txn_err(err: sea_orm::DbErr) -> DomainError {
     map_db_err(err)
 }
 
+/// Builds common metadata for `TransferRequested` audit events.
 fn transfer_metadata(
     idempotency_key: &str,
     fingerprint: &str,
@@ -522,6 +647,10 @@ fn transfer_metadata(
     ])
 }
 
+/// Exponential delay with random jitter for transfer retries.
+///
+/// `exp = BASE_RETRY_DELAY_MS * 2^min(attempt, 4)`, capped at
+/// [`MAX_RETRY_DELAY_MS`], then plus uniform jitter in `0..=capped/2`.
 fn jitter_backoff(attempt: u32) -> Duration {
     let mut rng = rand::thread_rng();
     let exp = BASE_RETRY_DELAY_MS.saturating_mul(1u64 << attempt.min(4));
@@ -530,6 +659,11 @@ fn jitter_backoff(attempt: u32) -> Duration {
     Duration::from_millis(capped + jitter)
 }
 
+/// Returns true when a domain error should trigger a transfer retry.
+///
+/// Matches `Validation` messages that contain `"serialization"` or `"deadlock"`
+/// (produced by [`map_txn_err`] / begin failures). Does **not** retry
+/// `InsufficientFunds`, idempotency conflicts, or other business errors.
 fn is_retryable_domain(err: &DomainError) -> bool {
     matches!(
         err,

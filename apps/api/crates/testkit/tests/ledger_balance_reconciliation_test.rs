@@ -1,4 +1,21 @@
-//! Reconciles projected balances against append-only ledger entries.
+//! Ledger ↔ balance projection reconciliation for non-system accounts.
+//!
+//! # Risk guarded
+//! Drift between append-only ledger history and materialized `account_balances`
+//! after seed and after multi-hop transfers.
+//!
+//! # Invariant proven
+//! For every non-system account, projection equals
+//! [`ficus_testkit::ledger_derived_balance`]; per-transfer sender/recipient
+//! ledger sums move by exactly the transfer amount.
+//!
+//! # Amounts chosen
+//! 3_000 / 1_500 / 500 and 750 stay inside seeded wallets so transfers complete
+//! and leave a non-trivial multi-entry ledger to reconcile.
+//!
+//! # Failure meaning
+//! Projection ≠ ledger sum means the executor updated one side without the
+//! other (or seed funding wrote inconsistent books for user accounts).
 
 use ficus_adapters_persistence::entities::{account_balances, accounts};
 use ficus_testkit::{

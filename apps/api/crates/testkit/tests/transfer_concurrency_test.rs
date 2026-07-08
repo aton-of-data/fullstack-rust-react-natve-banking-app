@@ -1,4 +1,23 @@
-//! 100 concurrent transfers from one funded account — ten mandatory assertions.
+//! Concurrent transfer stress: race 100 requests against one funded sender.
+//!
+//! # Risk guarded
+//! Lost updates, overspend, negative balances, and partial ledger writes under
+//! parallel `FOR UPDATE` contention on the same account.
+//!
+//! # Invariant proven
+//! Exactly `FUNDED_BALANCE / TRANSFER_AMOUNT` successes; remaining requests get
+//! `InsufficientFunds`; conservation holds; no negatives/orphans; balanced
+//! debit/credit pairs for each success.
+//!
+//! # Amounts chosen
+//! `FUNDED_BALANCE = 5_000`, `TRANSFER_AMOUNT = 100` → exactly 50 fundable
+//! transfers out of 100 concurrent attempts (deterministic success/fail split).
+//! Balance is set via [`ficus_testkit::set_account_balance`] (projection only)
+//! so the cap is exact for this suite.
+//!
+//! # Failure meaning
+//! Non-empty negatives, total not conserved, wrong success count, orphans, or
+//! unbalanced ledger pairs indicate locking/transaction bugs in the executor.
 
 use std::sync::Arc;
 

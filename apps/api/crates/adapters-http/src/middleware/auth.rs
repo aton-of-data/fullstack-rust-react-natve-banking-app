@@ -1,3 +1,11 @@
+//! JWT Bearer authentication middleware and extractor.
+//!
+//! [`require_auth`] validates `Authorization: Bearer <jwt>`, verifies the token
+//! via [`AppState::tokens`], and inserts [`AuthenticatedUser`] into request
+//! extensions. Handlers then extract `AuthenticatedUser` with Axum's
+//! [`FromRequestParts`] — routes that need auth should sit behind this
+//! middleware (as configured in [`crate::create_router`]).
+
 use axum::{
     extract::{FromRequestParts, Request},
     http::{header::AUTHORIZATION, request::Parts, HeaderMap},
@@ -10,9 +18,14 @@ use crate::error::ApiError;
 use crate::state::AppState;
 
 /// Authenticated user identity extracted from a valid JWT.
+///
+/// Populated by [`require_auth`]. Extracting this type in a handler without
+/// the middleware yields [`ApiError::Unauthorized`].
 #[derive(Debug, Clone)]
 pub struct AuthenticatedUser {
+    /// Subject user id from the verified token.
     pub user_id: Uuid,
+    /// Username claim from the verified token.
     pub username: String,
 }
 
@@ -31,7 +44,11 @@ where
     }
 }
 
-/// JWT authentication middleware — validates Bearer token and injects `AuthenticatedUser`.
+/// JWT authentication middleware — validates Bearer token and injects [`AuthenticatedUser`].
+///
+/// Missing/malformed `Authorization`, empty bearer secret, or failed token
+/// verification all map to [`ApiError::Unauthorized`] (HTTP 401). The raw
+/// token must not be logged.
 pub async fn require_auth(
     axum::extract::State(state): axum::extract::State<AppState>,
     mut request: Request,
@@ -51,6 +68,7 @@ pub async fn require_auth(
     Ok(next.run(request).await)
 }
 
+/// Reads `Authorization: Bearer <token>` (case-insensitive `Bearer` prefix).
 fn extract_bearer_token(headers: &HeaderMap) -> Result<String, ApiError> {
     let value = headers
         .get(AUTHORIZATION)

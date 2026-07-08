@@ -1,5 +1,13 @@
+//! Initial schema migration: users, accounts, balances, transfers, ledger,
+//! idempotency, audit tables, and append-only / integrity constraints.
+//!
+//! This module is pure DDL. Do not add seed data or application funding logic
+//! here. Financial correctness depends on the constraints and triggers defined
+//! in `up` (for example append-only ledger/audit protection).
+
 use sea_orm_migration::prelude::*;
 
+/// First schema migration for the Ficus API database.
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 

@@ -1,9 +1,16 @@
-//! Seeds development users with auditable system-funded balances.
+//! `seed` binary — local/dev users funded from the system account.
 //!
-//! Credentials (local dev only):
+//! Ensures a well-known system account exists, then creates alice/bob/charlie
+//! (skipping usernames that already exist). Initial balances are funded via
+//! explicit transfer + ledger debit/credit rows against the system account so
+//! seed state remains auditable — not a silent balance UPDATE.
+//!
+//! Credentials (local/dev only; do not use in production):
 //! - alice / password123 — $1,000.00
 //! - bob / password123 — $500.00
 //! - charlie / password123 — $250.00
+//!
+//! System account id: `00000000-0000-0000-0000-000000000001`.
 
 use chrono::Utc;
 use ficus_adapters_persistence::entities::{

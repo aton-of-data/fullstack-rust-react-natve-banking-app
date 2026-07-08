@@ -1,3 +1,9 @@
+//! OpenAPI aggregation for Swagger UI (development/test only).
+//!
+//! [`ApiDoc`] is generated from `#[utoipa::path]` annotations on handlers and
+//! DTO schemas. Runtime behavior is defined by handler code; this module only
+//! documents the HTTP contract.
+
 use utoipa::OpenApi;
 
 use crate::handlers::{

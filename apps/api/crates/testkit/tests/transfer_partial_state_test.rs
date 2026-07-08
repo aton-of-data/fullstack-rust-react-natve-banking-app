@@ -1,4 +1,20 @@
-//! Verifies failed transfers roll back completely with no partial persistence.
+//! Partial-state rollback: insufficient funds must not leave half-written rows.
+//!
+//! # Risk guarded
+//! A failed transfer persisting transfers/ledger/idempotency rows while rolling
+//! back balances (or the reverse), and decline audit missing outside the txn.
+//!
+//! # Invariant proven
+//! Totals, transfer counts, and orphan ledger scan unchanged after
+//! `InsufficientFunds`; exactly one additional audit event; declined key can
+//! still be reused for a later successful attempt.
+//!
+//! # Amounts chosen
+//! 1_000_000 / 999_999 from charlie (seeded $250) guarantees hard failure.
+//!
+//! # Failure meaning
+//! Extra transfer/ledger rows or missing decline audit indicates broken
+//! transaction boundaries around insufficient-funds handling.
 
 use ficus_domain::errors::DomainError;
 use ficus_testkit::{

@@ -1,3 +1,13 @@
+//! In-memory sliding-window rate limiting for login and transfers.
+//!
+//! Limiters are process-local ([`DashMap`]) and suitable for single-instance
+//! deployments or as a first line of defense. Multi-instance deployments need
+//! an external store for coordinated limits.
+//!
+//! - [`login_rate_limit`] keys by client IP (honoring proxy headers when
+//!   configured).
+//! - [`transfer_rate_limit`] keys by authenticated user id when available.
+
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
@@ -25,6 +35,9 @@ impl RateLimiter {
     }
 
     /// Returns an error when the key has exceeded its quota.
+    ///
+    /// On success, records the current timestamp for the key. Excess requests
+    /// yield [`ApiError::RateLimited`] (HTTP 429).
     pub fn check(&self, key: &str) -> Result<(), ApiError> {
         let now = Instant::now();
         let cutoff = now - self.window;
@@ -41,6 +54,11 @@ impl RateLimiter {
     }
 }
 
+/// Resolves the client IP for rate-limit keys.
+///
+/// When `trust_proxy_headers` is true, prefers the first `X-Forwarded-For`
+/// hop, then `X-Real-Ip`. Otherwise uses the socket peer from Axum
+/// `ConnectInfo`, falling back to `"unknown"`.
 fn client_ip(request: &Request, trust_proxy_headers: bool) -> String {
     if trust_proxy_headers {
         if let Some(ip) = request
@@ -69,6 +87,9 @@ fn client_ip(request: &Request, trust_proxy_headers: bool) -> String {
 }
 
 /// Rate-limits login attempts by client IP.
+///
+/// State is `(RateLimiter, trust_proxy_headers)` from [`crate::create_router`].
+/// Exceeding the limit returns 429 before the login handler runs.
 pub async fn login_rate_limit(
     axum::extract::State((limiter, trust_proxy_headers)): axum::extract::State<(RateLimiter, bool)>,
     request: Request,
@@ -80,6 +101,10 @@ pub async fn login_rate_limit(
 }
 
 /// Rate-limits transfer requests by authenticated user ID.
+///
+/// Prefers [`super::auth::AuthenticatedUser`] from extensions (set by
+/// [`crate::require_auth`]). Falls back to peer IP if the user extension is
+/// missing. Exceeding the limit returns 429.
 pub async fn transfer_rate_limit(
     axum::extract::State(limiter): axum::extract::State<RateLimiter>,
     request: Request,

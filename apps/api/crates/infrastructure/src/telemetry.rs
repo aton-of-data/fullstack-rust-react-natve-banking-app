@@ -1,3 +1,9 @@
+//! Structured logging and optional OpenTelemetry hooks.
+//!
+//! Initializes a JSON `tracing` subscriber. When `OTEL_EXPORTER_OTLP_ENDPOINT`
+//! is set, logs that export is expected via a collector sidecar; in-process
+//! OTLP export is not wired here yet.
+
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 use crate::config::AppConfig;

@@ -1,3 +1,8 @@
+//! Shared Axum application state.
+//!
+//! Built by the infrastructure composition root and injected into handlers.
+//! Contains application services and runtime knobs only — no SeaORM types.
+
 use std::sync::Arc;
 
 use async_trait::async_trait;
@@ -14,18 +19,31 @@ pub trait ReadinessCheck: Send + Sync {
 /// Shared application services and infrastructure handles for HTTP handlers.
 #[derive(Clone)]
 pub struct AppState {
+    /// Authentication use cases.
     pub auth: Arc<AuthService>,
+    /// User search / balance / ledger use cases.
     pub users: Arc<UserService>,
+    /// Transfer orchestration use cases.
     pub transfers: Arc<TransferService>,
+    /// Feed list and subscribe use cases.
     pub feed: Arc<FeedService>,
+    /// JWT verification used by auth middleware.
     pub tokens: Arc<dyn TokenService>,
+    /// Optional readiness probe for `/health/ready`.
     pub readiness: Option<Arc<dyn ReadinessCheck>>,
+    /// Login attempts allowed per minute per client key.
     pub login_rate_limit_per_min: u32,
+    /// Transfer attempts allowed per minute per authenticated user.
     pub transfer_rate_limit_per_min: u32,
+    /// Default pagination page size for list endpoints.
     pub default_page_size: u64,
+    /// Allowed CORS origins.
     pub cors_origins: Vec<String>,
+    /// Deployment environment name (`development`, `test`, `production`, …).
     pub environment: String,
+    /// Bearer token required for `/metrics` when set.
     pub metrics_auth_token: Option<String>,
+    /// When true, honor `X-Forwarded-For` for login rate-limit keys.
     pub trust_proxy_headers: bool,
 }
 

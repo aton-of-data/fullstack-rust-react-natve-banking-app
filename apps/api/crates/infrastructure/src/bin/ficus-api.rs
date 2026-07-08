@@ -1,3 +1,8 @@
+//! `ficus-api` binary — HTTP API process entrypoint.
+//!
+//! Loads [`ficus_infrastructure::AppConfig`], initializes telemetry, wires the
+//! Axum app via [`ficus_infrastructure::build_app`], and serves until shutdown.
+
 use ficus_infrastructure::{build_app, init_telemetry, shutdown_telemetry, AppConfig};
 use tracing::info;
 

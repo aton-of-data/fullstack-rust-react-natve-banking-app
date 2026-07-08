@@ -1,4 +1,9 @@
 //! Wired application services and optional HTTP server for integration tests.
+//!
+//! [`TestAppBuilder`] configures DB connection, optional pre-seeded users, rate
+//! limits, and whether to spawn an Axum server. [`wire_services`] builds the
+//! same repository/executor stack used in production without starting HTTP —
+//! preferred for direct `TransferService` financial tests.
 
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -27,30 +32,47 @@ use crate::seed::{seed_test_users, TestUsers};
 /// A seeded user with account metadata.
 #[derive(Debug, Clone)]
 pub struct TestUser {
+    /// User UUID.
     pub id: uuid::Uuid,
+    /// Login username.
     pub username: String,
+    /// Primary account UUID.
     pub account_id: uuid::Uuid,
+    /// Balance after seed funding (minor units), before test mutations.
     pub initial_balance_minor: i64,
 }
 
 /// Wired services for direct use-case testing.
 pub struct WiredServices {
+    /// Shared SeaORM connection.
     pub db: DatabaseConnection,
+    /// Seeded alice/bob/charlie fixture.
     pub users: TestUsers,
+    /// Application transfer orchestration service.
     pub transfer_service: Arc<TransferService>,
+    /// Account repository port.
     pub accounts: Arc<dyn AccountRepository>,
+    /// Transfer repository port.
     pub transfers: Arc<dyn TransferRepository>,
+    /// Transactional transfer executor port.
     pub executor: Arc<dyn TransferExecutor>,
 }
 
 /// Integration test harness with optional HTTP server.
 pub struct TestApp {
+    /// Shared SeaORM connection.
     pub db: DatabaseConnection,
+    /// Seeded alice/bob/charlie fixture.
     pub users: TestUsers,
+    /// Application transfer orchestration service.
     pub transfer_service: Arc<TransferService>,
+    /// Account repository port.
     pub accounts: Arc<dyn AccountRepository>,
+    /// Transfer repository port.
     pub transfers: Arc<dyn TransferRepository>,
+    /// Transactional transfer executor port.
     pub executor: Arc<dyn TransferExecutor>,
+    /// Base URL when [`TestAppBuilder::with_http_server`] was used.
     pub base_url: Option<String>,
     server_handle: Option<JoinHandle<()>>,
 }
@@ -71,6 +93,10 @@ impl Drop for TestApp {
 }
 
 /// Builder for a fully wired test application.
+///
+/// Prefer [`Self::with_db`] + [`Self::with_users`] after [`crate::setup_isolated_test_db`]
+/// so truncate/seed isolation is already applied. Call [`Self::with_http_server`]
+/// only for full-stack HTTP contract tests.
 pub struct TestAppBuilder {
     database_url: String,
     db: Option<DatabaseConnection>,
@@ -187,6 +213,11 @@ impl TestAppBuilder {
 }
 
 /// Wires repositories and use cases without starting HTTP.
+///
+/// Mirrors production composition for money-path tests: Postgres repositories,
+/// [`PostgresTransferExecutor`], in-memory feed broadcaster, and
+/// [`TransferService`]. Auth/user services are constructed for parity but not
+/// exposed on [`WiredServices`].
 pub async fn wire_services(
     db: DatabaseConnection,
     users: TestUsers,

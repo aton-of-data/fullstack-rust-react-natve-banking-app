@@ -1,3 +1,9 @@
+//! User search HTTP handlers.
+//!
+//! Authenticated callers can look up other users by username prefix to pick
+//! transfer recipients. Search logic and exclusion of the current user (as
+//! applicable) live in [`ficus_application::UserService`].
+
 use axum::{
     extract::{Query, State},
     Json,
@@ -14,11 +20,28 @@ use crate::state::AppState;
 pub struct UserSearchQuery {
     /// Username prefix to search for.
     pub query: String,
-    /// Opaque pagination cursor.
+    /// Opaque pagination cursor from a previous page's `next_cursor`.
     pub cursor: Option<String>,
 }
 
-/// Searches users by username prefix.
+/// `GET /v1/users` — search users by username prefix.
+///
+/// # Auth
+///
+/// Requires Bearer JWT ([`AuthenticatedUser`]). The authenticated user id is
+/// passed to the application layer so results can exclude or deprioritize self
+/// according to product rules.
+///
+/// # Query
+///
+/// - `query` — required username prefix
+/// - `cursor` — optional opaque pagination cursor
+///
+/// Page size uses [`AppState::default_page_size`].
+///
+/// # Errors
+///
+/// 400 on validation failures; 401 when unauthenticated.
 #[utoipa::path(
     get,
     path = "/v1/users",

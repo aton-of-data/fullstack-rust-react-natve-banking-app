@@ -1,3 +1,9 @@
+//! Axum middleware for auth, correlation IDs, rate limits, and metrics.
+//!
+//! Middleware runs outside handlers and enforces cross-cutting transport
+//! policies. Re-exports below are the public adapter surface used by
+//! [`crate::create_router`] and by handlers that extract typed extensions.
+
 pub mod auth;
 pub mod metrics_auth;
 pub mod rate_limit;

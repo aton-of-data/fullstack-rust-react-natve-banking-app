@@ -1,4 +1,11 @@
 //! In-process feed broadcaster with optional PostgreSQL LISTEN/NOTIFY bridge.
+//!
+//! Implements [`ficus_application::ports::FeedBroadcaster`] for
+//! realtime SSE and multi-instance fan-out. Publication is **best-effort** and
+//! happens **after** a transfer has already committed — failures here must not
+//! be treated as money-movement rollbacks.
+//!
+//! This adapter does not write ledger or balance rows.
 
 use std::sync::Arc;
 

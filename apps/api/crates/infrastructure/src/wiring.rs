@@ -1,3 +1,10 @@
+//! Composition root: connect Postgres, wire ports, build the Axum router.
+//!
+//! [`build_app`] is the single production wiring path used by `ficus-api` and
+//! by testkit HTTP servers. It constructs repository/executor adapters,
+//! Argon2/JWT adapters, application services, and passes them into
+//! `ficus_adapters_http::create_router`.
+
 use std::sync::Arc;
 
 use axum::Router;
@@ -18,7 +25,10 @@ use crate::auth::{Argon2PasswordHasher, JwtTokenService};
 use crate::config::AppConfig;
 use crate::readiness::DbReadiness;
 
-/// Builds the wired Axum application.
+/// Builds the wired Axum application from configuration.
+///
+/// Connects to Postgres, constructs persistence adapters and application
+/// services, attaches the DB readiness probe, and returns the HTTP router.
 pub async fn build_app(config: &AppConfig) -> Result<Router, String> {
     let db = Database::connect(&config.database_url)
         .await

@@ -1,4 +1,36 @@
-//! Ficus integration testkit — Postgres testcontainers, migrations, and wired services.
+//! Ficus integration testkit — Postgres fixtures, seed helpers, and assertions.
+//!
+//! Provides disposable (or `TEST_DATABASE_URL`) Postgres, SeaORM migrations,
+//! truncate/seed isolation, wired transfer-service harnesses, HTTP helpers,
+//! and ledger/balance assertion utilities used by financial integration tests.
+//!
+//! # Architectural role
+//!
+//! Test-only support crate above `infrastructure`. It wires the same ports as
+//! production for in-process tests, and can start an HTTP server via
+//! [`TestAppBuilder`].
+//!
+//! # Isolation helpers
+//!
+//! - [`setup_isolated_test_db`] — start Postgres, migrate, truncate, seed
+//!   default users under an advisory lock.
+//! - [`PostgresFixture`] — running container or external URL.
+//! - [`reset_test_database`] — truncate application tables (CASCADE).
+//!
+//! **Warning:** truncate/seed helpers **bypass production transfer flows**.
+//! They insert users/accounts and system funding (or direct balance updates)
+//! outside the live API path. Use them to establish fixtures only; assert
+//! money movement through [`execute_transfer`] / HTTP helpers when proving
+//! production invariants.
+//!
+//! # Neighboring crates
+//!
+//! Depends on infrastructure wiring/auth and persistence repositories. Does
+//! not redefine domain ledger rules — it checks them after exercising services.
+
+#![warn(missing_docs)]
+#![warn(rustdoc::broken_intra_doc_links)]
+#![warn(rustdoc::bare_urls)]
 
 mod app;
 mod assertions;
@@ -13,8 +45,8 @@ pub use assertions::{
 };
 pub use http::{
     http_client, http_create_transfer, http_create_transfer_raw, http_get_balance, http_get_feed,
-    http_get_ledger, http_get_me, http_get_metrics, http_get_metrics_with_auth, http_login, http_login_response, http_logout,
-    HttpJsonResponse, HttpTransferParams,
+    http_get_ledger, http_get_me, http_get_metrics, http_get_metrics_with_auth, http_login,
+    http_login_response, http_logout, HttpJsonResponse, HttpTransferParams,
 };
 pub use seed::{seed_test_users, set_account_balance, TestUsers, SYSTEM_ACCOUNT_ID};
 
@@ -33,7 +65,11 @@ static TEST_ISOLATION_LOCK: Mutex<()> = Mutex::const_new(());
 const TEST_ISOLATION_ADVISORY_LOCK: i64 = 0x4649_4355;
 
 /// Running PostgreSQL testcontainer with connection URL.
+///
+/// Holds the container handle (when started via testcontainers) so the instance
+/// stays alive for the duration of the test that owns this fixture.
 pub struct PostgresFixture {
+    /// Postgres connection URL for SeaORM / Axum wiring.
     pub database_url: String,
     _container: Option<ContainerAsync<Postgres>>,
 }
@@ -85,6 +121,9 @@ pub async fn run_migrations(database_url: &str) -> Result<DatabaseConnection, se
 }
 
 /// Truncates application tables for isolated integration tests.
+///
+/// **Bypasses production transfer flows** — destroys rows via `TRUNCATE ...
+/// CASCADE` under an advisory lock. Prefer after migrate, before seed.
 pub async fn reset_test_database(db: &DatabaseConnection) -> Result<(), sea_orm::DbErr> {
     reset_test_database_locked(db).await
 }
@@ -116,6 +155,9 @@ async fn reset_test_database_locked(db: &DatabaseConnection) -> Result<(), sea_o
 }
 
 /// Starts Postgres, runs migrations, resets data, and seeds default users.
+///
+/// Truncate + seed **bypass production transfer APIs**; funding uses seed
+/// helpers so tests start from a known balance snapshot.
 pub async fn setup_isolated_test_db(
 ) -> Result<(PostgresFixture, DatabaseConnection, TestUsers), String> {
     let pg = start_postgres().await;

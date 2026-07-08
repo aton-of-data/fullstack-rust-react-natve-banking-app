@@ -1,3 +1,11 @@
+//! Idempotency key read/store repository.
+//!
+//! **Tables:** `idempotency_requests`.
+//!
+//! Provides lookup and insert-with-`ON CONFLICT DO NOTHING` for application
+//! paths that store responses outside the transfer executor. The transfer
+//! executor also inserts into this table inside its money transaction.
+
 use async_trait::async_trait;
 use ficus_application::ports::{IdempotencyRecord, IdempotencyRepository};
 use ficus_domain::errors::DomainError;
@@ -8,7 +16,7 @@ use crate::entities::idempotency_requests::{self, ActiveModel, Entity as Idempot
 use crate::error::map_db_err;
 use crate::mapper::idempotency_to_record;
 
-/// SeaORM-backed idempotency repository.
+/// SeaORM-backed idempotency repository (`idempotency_requests`).
 pub struct PostgresIdempotencyRepository {
     db: DatabaseConnection,
 }

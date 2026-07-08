@@ -1,3 +1,9 @@
+//! Account balance and ledger HTTP handlers.
+//!
+//! Authenticated routes under `/v1/accounts/me/*` expose the caller's current
+//! balance and paginated double-entry ledger history. Handlers read through
+//! [`ficus_application::UserService`]; they do not mutate balances.
+
 use axum::{
     extract::{Query, State},
     Json,
@@ -12,11 +18,20 @@ use crate::state::AppState;
 /// Query parameters for paginated ledger history.
 #[derive(Debug, Deserialize, utoipa::IntoParams, utoipa::ToSchema)]
 pub struct LedgerQuery {
-    /// Opaque pagination cursor.
+    /// Opaque pagination cursor from a previous page's `next_cursor`.
     pub cursor: Option<String>,
 }
 
-/// Returns the authenticated user's current balance.
+/// `GET /v1/accounts/me/balance` — current balance for the authenticated user.
+///
+/// # Auth
+///
+/// Requires Bearer JWT ([`AuthenticatedUser`]). Returns the caller's account
+/// only; there is no path parameter for another user's balance.
+///
+/// # Errors
+///
+/// 401 unauthenticated; 404 when no account exists for the user.
 #[utoipa::path(
     get,
     path = "/v1/accounts/me/balance",
@@ -36,7 +51,16 @@ pub async fn get_balance(
     Ok(Json(balance.into()))
 }
 
-/// Returns paginated ledger entries for the authenticated user.
+/// `GET /v1/accounts/me/ledger` — paginated ledger entries for the caller.
+///
+/// # Auth
+///
+/// Requires Bearer JWT. Page size comes from [`AppState::default_page_size`].
+/// Pass `cursor` from a prior response to continue.
+///
+/// # Errors
+///
+/// 401 unauthenticated; 404 when the account is missing.
 #[utoipa::path(
     get,
     path = "/v1/accounts/me/ledger",

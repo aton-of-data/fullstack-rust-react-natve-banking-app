@@ -1,3 +1,19 @@
+//! Authentication HTTP handlers.
+//!
+//! Public login issues a JWT access token. Logout and `/me` require a valid
+//! Bearer token via [`crate::require_auth`]. Credential verification and token
+//! signing are owned by the application/auth ports — this module only bridges
+//! HTTP.
+//!
+//! # Security notes
+//!
+//! - Failed logins return a **generic** invalid-credentials message so
+//!   responses do not distinguish unknown usernames from bad passwords.
+//! - Passwords and tokens must never be written to logs; metrics record only
+//!   success/failure counts.
+//! - Logout is a **client-side** token discard: the server returns 204 and does
+//!   not maintain a server-side session blocklist in this adapter.
+
 use axum::{extract::State, http::StatusCode, Json};
 use ficus_application::dto::{LoginRequest, LoginResponse, MeResponse};
 
@@ -6,7 +22,26 @@ use crate::metrics::record_login_attempt;
 use crate::middleware::{AuthenticatedUser, RequestContext};
 use crate::state::AppState;
 
-/// Authenticates a user and returns a JWT access token.
+/// `POST /v1/auth/login` — authenticate with username and password.
+///
+/// # Auth requirements
+///
+/// **Unauthenticated.** Protected only by the login rate-limiter (per client
+/// IP). Does not require a Bearer token.
+///
+/// # Request / response
+///
+/// Accepts JSON [`LoginRequest`] (`username`, `password`). On success returns
+/// [`LoginResponse`] containing a JWT `access_token` plus `user_id` and
+/// `username`. Clients must send that JWT as `Authorization: Bearer <token>`
+/// on subsequent protected routes.
+///
+/// # Errors
+///
+/// Invalid username or password maps to [`ApiError`] /
+/// [`DomainError::InvalidCredentials`](ficus_domain::errors::DomainError::InvalidCredentials)
+/// → HTTP 401 with a generic `"Invalid username or password"` message (no
+/// user enumeration). Rate limit → 429.
 #[utoipa::path(
     post,
     path = "/v1/auth/login",
@@ -47,7 +82,19 @@ pub async fn login(
     }))
 }
 
-/// Logs out the current session (client should discard the token).
+/// `POST /v1/auth/logout` — end the client session.
+///
+/// # Auth requirements
+///
+/// Requires a valid Bearer JWT ([`AuthenticatedUser`]). Invalid/missing token
+/// → 401 before this handler runs.
+///
+/// # Behavior
+///
+/// Returns **204 No Content**. There is no server-side session store to
+/// invalidate in this API; clients must discard the access token locally.
+/// Calling logout is still useful for uniform client flows and to confirm the
+/// token was valid at logout time.
 #[utoipa::path(
     post,
     path = "/v1/auth/logout",
@@ -62,7 +109,17 @@ pub async fn logout(_user: AuthenticatedUser) -> StatusCode {
     StatusCode::NO_CONTENT
 }
 
-/// Returns the authenticated user's profile.
+/// `GET /v1/auth/me` — return the authenticated user's profile.
+///
+/// # Auth requirements
+///
+/// Requires a valid Bearer JWT. Resolves the current user via
+/// [`AuthenticatedUser::user_id`] and the auth application service.
+///
+/// # Response
+///
+/// JSON [`MeResponse`] with `user_id` and `username`. Returns 401 when
+/// unauthenticated; 404-style domain errors if the user record is missing.
 #[utoipa::path(
     get,
     path = "/v1/auth/me",

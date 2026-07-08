@@ -1,4 +1,19 @@
-//! Database-level immutability and constraint enforcement tests.
+//! Database-level immutability: ledger and audit rows are append-only.
+//!
+//! # Risk guarded
+//! Direct SQL UPDATE/DELETE rewriting history (fraud / silent mutation).
+//!
+//! # Invariant proven
+//! Postgres triggers reject UPDATE/DELETE on `ledger_entries` and
+//! `audit_events` with an append-only error; completed transfer amounts stay
+//! positive under constraint checks covered elsewhere in this file.
+//!
+//! # Amounts chosen
+//! Uses seed ledger rows and a tiny 50-unit transfer only to create an audit
+//! trail — size is irrelevant; presence of a row to mutate is what matters.
+//!
+//! # Failure meaning
+//! Successful UPDATE/DELETE means immutability triggers are missing or broken.
 
 use ficus_adapters_persistence::entities::{audit_events, ledger_entries};
 use ficus_testkit::{execute_transfer, setup_isolated_test_db, TestAppBuilder};

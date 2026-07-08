@@ -1,3 +1,9 @@
+//! Request and trace ID correlation middleware.
+//!
+//! Ensures every request has `X-Request-Id` and `X-Trace-Id` values (accepting
+//! inbound headers when present, otherwise generating UUIDs), stores them in
+//! [`RequestContext`] for handlers, and echoes them on the response.
+
 use axum::{
     extract::Request,
     http::{HeaderName, HeaderValue},
@@ -6,23 +12,32 @@ use axum::{
 };
 use uuid::Uuid;
 
-/// Request ID response/request header name.
+/// Request ID response/request header name (`x-request-id`).
 pub const REQUEST_ID_HEADER: &str = "x-request-id";
 
-/// Trace ID response/request header name.
+/// Trace ID response/request header name (`x-trace-id`).
 pub const TRACE_ID_HEADER: &str = "x-trace-id";
 
 static REQUEST_ID: HeaderName = HeaderName::from_static(REQUEST_ID_HEADER);
 static TRACE_ID: HeaderName = HeaderName::from_static(TRACE_ID_HEADER);
 
 /// Per-request correlation identifiers propagated to handlers and responses.
+///
+/// Inserted by `request_id_middleware`. Handlers extract this via
+/// `Extension<RequestContext>` (for example login and transfer).
 #[derive(Debug, Clone)]
 pub struct RequestContext {
+    /// Unique id for this HTTP request (audit / support correlation).
     pub request_id: String,
+    /// Distributed-trace style id (may be client-supplied or generated).
     pub trace_id: String,
 }
 
 /// Injects or generates request and trace IDs for every request.
+///
+/// Empty inbound header values are ignored and replaced with new UUIDs.
+/// Response headers always include the resolved ids when they parse as valid
+/// header values.
 pub async fn request_id_middleware(mut request: Request, next: Next) -> Response {
     let request_id = request
         .headers()

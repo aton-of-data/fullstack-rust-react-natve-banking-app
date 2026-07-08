@@ -1,3 +1,10 @@
+//! Password hashing and JWT access-token adapters for application ports.
+//!
+//! Implements [`ficus_application::ports::PasswordHasher`] and
+//! [`ficus_application::ports::TokenService`] using Argon2id and `jsonwebtoken`.
+//! Secrets and TTLs come from configuration; this module does not invent
+//! defaults for production secrets.
+
 use argon2::{
     password_hash::{
         rand_core::OsRng, PasswordHash, PasswordHasher as ArgonHasher, PasswordVerifier, SaltString,
@@ -12,7 +19,7 @@ use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation}
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-/// Argon2id password hasher.
+/// Argon2id password hasher implementing the application [`PasswordHasher`] port.
 pub struct Argon2PasswordHasher;
 
 #[async_trait]
@@ -35,6 +42,7 @@ impl PasswordHasher for Argon2PasswordHasher {
     }
 }
 
+/// JWT claims payload (subject, username, issued-at, expiry).
 #[derive(Debug, Serialize, Deserialize)]
 struct Claims {
     sub: String,
@@ -43,13 +51,14 @@ struct Claims {
     iat: i64,
 }
 
-/// JWT access token service.
+/// JWT access token service implementing the application [`TokenService`] port.
 pub struct JwtTokenService {
     secret: String,
     expiry_secs: u64,
 }
 
 impl JwtTokenService {
+    /// Creates a service with the given HMAC secret and token lifetime in seconds.
     pub fn new(secret: String, expiry_secs: u64) -> Self {
         Self {
             secret,
