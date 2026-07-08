@@ -21,6 +21,10 @@
     "security:scan": "node scripts/security-scan.mjs",
     "api:dev": "make api-dev",
     "mobile:dev": "pnpm --filter @ficus/mobile start",
+    "mobile:e2e": "node apps/mobile/e2e/run-maestro.mjs",
+    "mobile:e2e:ios": "node apps/mobile/e2e/run-maestro.mjs --platform=ios",
+    "mobile:e2e:android": "node apps/mobile/e2e/run-maestro.mjs --platform=android",
+    "mobile:e2e:record": "node apps/mobile/e2e/run-maestro.mjs --record",
     "db:migrate": "make db-migrate",
     "db:seed": "make db-seed",
     "prepare": "husky || true"

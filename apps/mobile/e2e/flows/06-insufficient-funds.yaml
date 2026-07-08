@@ -1,0 +1,88 @@
+appId: host.exp.Exponent
+---
+- runFlow:
+    file: ../helpers/reset-to-login.yaml
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 30000
+- tapOn:
+    id: "login-username"
+- eraseText
+- inputText: "charlie"
+- tapOn:
+    id: "login-password"
+- eraseText
+- inputText: "password123"
+- tapOn:
+    id: "login-submit"
+- runFlow:
+    when:
+      visible: "Agora Não"
+    commands:
+      - tapOn: "Agora Não"
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- extendedWaitUntil:
+    visible:
+      id: "home-balance"
+    timeout: 20000
+- extendedWaitUntil:
+    visible: "Send tab"
+    timeout: 15000
+- tapOn: "Send tab"
+- extendedWaitUntil:
+    visible:
+      id: "transfer-search-step"
+    timeout: 20000
+- tapOn:
+    id: "transfer-search"
+- eraseText
+- inputText: "alice"
+- extendedWaitUntil:
+    visible:
+      id: "recipient-alice"
+    timeout: 15000
+- tapOn: "Find recipient"
+- tapOn:
+    id: "recipient-alice"
+- runFlow:
+    when:
+      visible:
+        id: "recipient-alice"
+    commands:
+      - tapOn: "Select recipient alice"
+- extendedWaitUntil:
+    visible:
+      id: "transfer-amount-step"
+    timeout: 15000
+- assertVisible: "Send to @alice"
+- tapOn:
+    id: "transfer-amount"
+- eraseText
+- inputText: "99999.00"
+- tapOn: "Send Money"
+- tapOn:
+    id: "transfer-review"
+- runFlow:
+    when:
+      visible:
+        id: "transfer-amount-step"
+    commands:
+      - tapOn: "Review"
+- extendedWaitUntil:
+    visible:
+      id: "transfer-confirm-step"
+    timeout: 15000
+- tapOn:
+    id: "transfer-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "transfer-error"
+    timeout: 20000
+- assertVisible:
+    id: "transfer-error"
+- assertVisible: "Insufficient funds.*"

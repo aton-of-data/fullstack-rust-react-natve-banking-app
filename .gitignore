@@ -42,6 +42,12 @@ coverage/
 .nyc_output/
 test-results/
 
+# Maestro suite run artifacts (keep curated screenshots + docs-capture.md)
+apps/mobile/e2e/reports/latest.json
+apps/mobile/e2e/reports/latest.md
+apps/mobile/e2e/reports/run-*.log
+apps/mobile/e2e/reports/*.log
+
 # Logs
 *.log
 logs/

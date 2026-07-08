@@ -1,0 +1,4 @@
+# Shared Maestro config for Expo Go (iOS).
+# Development builds: com.ficus.mobile
+# Android Expo Go: host.exp.exponent
+appId: host.exp.Exponent

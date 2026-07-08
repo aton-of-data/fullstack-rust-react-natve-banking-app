@@ -1,0 +1,57 @@
+appId: host.exp.Exponent
+---
+- runFlow:
+    when:
+      visible: "Agora Não"
+    commands:
+      - tapOn: "Agora Não"
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+# Already logged out — nothing to do.
+- runFlow:
+    when:
+      visible:
+        id: "login-screen"
+    commands:
+      - assertVisible:
+          id: "login-title"
+# Authenticated paths only when login is NOT visible.
+- runFlow:
+    when:
+      notVisible:
+        id: "login-screen"
+    commands:
+      - runFlow:
+          when:
+            visible: "Back"
+          commands:
+            - tapOn: "Back"
+      - runFlow:
+          when:
+            visible: "Back"
+          commands:
+            - tapOn: "Back"
+      - runFlow:
+          when:
+            visible: "Home tab"
+          commands:
+            - tapOn: "Home tab"
+      - runFlow:
+          when:
+            visible:
+              id: "home-balance"
+          commands:
+            - tapOn:
+                id: "home-logout"
+      - runFlow:
+          when:
+            visible: "Log out"
+          commands:
+            - tapOn: "Log out"
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 30000

@@ -1,0 +1,90 @@
+appId: host.exp.Exponent
+---
+- runFlow:
+    file: ../helpers/reset-to-login.yaml
+- extendedWaitUntil:
+    visible:
+      id: "login-screen"
+    timeout: 30000
+- tapOn:
+    id: "login-username"
+- eraseText
+- inputText: "alice"
+- tapOn:
+    id: "login-password"
+- eraseText
+- inputText: "password123"
+- tapOn:
+    id: "login-submit"
+- runFlow:
+    when:
+      visible: "Agora Não"
+    commands:
+      - tapOn: "Agora Não"
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- extendedWaitUntil:
+    visible:
+      id: "home-balance"
+    timeout: 20000
+- extendedWaitUntil:
+    visible: "Send tab"
+    timeout: 15000
+- tapOn: "Send tab"
+- extendedWaitUntil:
+    visible:
+      id: "transfer-search-step"
+    timeout: 20000
+- tapOn:
+    id: "transfer-search"
+- eraseText
+- inputText: "bob"
+- extendedWaitUntil:
+    visible:
+      id: "recipient-bob"
+    timeout: 15000
+- tapOn: "Find recipient"
+- tapOn:
+    id: "recipient-bob"
+- runFlow:
+    when:
+      visible:
+        id: "recipient-bob"
+    commands:
+      - tapOn: "Select recipient bob"
+- extendedWaitUntil:
+    visible:
+      id: "transfer-amount-step"
+    timeout: 15000
+- assertVisible: "Send to @bob"
+- tapOn:
+    id: "transfer-amount"
+- eraseText
+- inputText: "1.00"
+# Dismiss decimal pad by tapping static title (hideKeyboard fails here).
+- tapOn: "Send Money"
+- tapOn:
+    id: "transfer-review"
+- runFlow:
+    when:
+      visible:
+        id: "transfer-amount-step"
+    commands:
+      - tapOn: "Review"
+- extendedWaitUntil:
+    visible:
+      id: "transfer-confirm-step"
+    timeout: 15000
+- assertVisible: "Confirm transfer"
+- tapOn:
+    id: "transfer-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "transfer-success"
+    timeout: 20000
+- assertVisible: "Transfer sent"
+- assertVisible:
+    id: "transfer-success-done"
