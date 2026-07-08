@@ -3,7 +3,7 @@
 ## Commits
 
 Granular commits authored as **aton-of-data**
-`<154991289+aton-of-data@users.noreply.github.com>` (plus this docs follow-up):
+`<154991289+aton-of-data@users.noreply.github.com>`:
 
 | Hash                                       | Message                                                                 |
 | ------------------------------------------ | ----------------------------------------------------------------------- |
@@ -12,6 +12,7 @@ Granular commits authored as **aton-of-data**
 | `e00ddf05f50fe775d2483068672a969b065895c8` | `test(mobile): cover idempotency, 401 logout, sse, and confirmation ux` |
 | `b802607615c544ac0a9eddd21a9fe3cbd93dc376` | `test(mobile): add maestro e2e suite and curated flow screenshots`      |
 | `d96202f2546780b5258292e17d3c9d5fa0eae1a7` | `docs: document maestro e2e and mobile hardening work item`             |
+| `bd38408e9f3438217c3eab83d7588c6b3105b8b0` | `docs: record commit report and maestro suite pass evidence`            |
 
 ## Pipeline Verification
 
@@ -38,7 +39,6 @@ Granular commits authored as **aton-of-data**
 | ----------------------------- | ------------------------------ |
 | No secrets                    | ✓                              |
 | Authorization                 | User requested wrap-up commits |
-| commitlint                    | ✓                              |
 | lint + typecheck + tests      | exit 0 (79 mobile tests)       |
 | Maestro `pnpm mobile:e2e:ios` | exit 0, 6/6                    |
 
