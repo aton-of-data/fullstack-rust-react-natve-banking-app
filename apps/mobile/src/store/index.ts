@@ -20,7 +20,7 @@ export const store = configureStore({
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(baseApi.middleware).prepend(listenerMiddleware.middleware),
+    getDefaultMiddleware().prepend(listenerMiddleware.middleware).concat(baseApi.middleware),
 });
 
 /** Root state type derived from the store. */
