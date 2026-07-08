@@ -106,6 +106,16 @@ export function formatMinorUnits(minor: string | bigint, options: FormatMinorUni
 }
 
 /**
+ * Whether the current runtime exposes `Intl.NumberFormat.prototype.formatToParts`.
+ * Hermes / some React Native Intl polyfills omit it.
+ *
+ * @returns True when formatToParts is available.
+ */
+function supportsFormatToParts(): boolean {
+  return typeof Intl.NumberFormat.prototype.formatToParts === 'function';
+}
+
+/**
  * Formats an integer major-unit component with locale grouping, without floats.
  *
  * @param value Integer major units.
@@ -118,9 +128,12 @@ function formatIntegerWithGrouping(value: bigint, locale: string): string {
   }
 
   const digits = value.toString(10);
-  const groupingSeparator =
-    new Intl.NumberFormat(locale).formatToParts(1000).find((part) => part.type === 'group')
-      ?.value ?? ',';
+  let groupingSeparator = ',';
+  if (supportsFormatToParts()) {
+    groupingSeparator =
+      new Intl.NumberFormat(locale).formatToParts(1000).find((part) => part.type === 'group')
+        ?.value ?? ',';
+  }
 
   return digits.replace(/\B(?=(\d{3})+(?!\d))/g, groupingSeparator);
 }
@@ -132,7 +145,10 @@ function formatIntegerWithGrouping(value: bigint, locale: string): string {
  * @returns Decimal separator character.
  */
 function getDecimalSeparator(locale: string): string {
-  const parts = new Intl.NumberFormat(locale).formatToParts(1n);
+  if (!supportsFormatToParts()) {
+    return '.';
+  }
+  const parts = new Intl.NumberFormat(locale).formatToParts(1.1);
   return parts.find((part) => part.type === 'decimal')?.value ?? '.';
 }
 
@@ -179,6 +195,12 @@ export function subtractMinor(left: string | bigint, right: string | bigint): Mi
  * @returns Currency symbol or empty string when unavailable.
  */
 function getCurrencySymbol(currency: string, locale: string): string {
+  if (!supportsFormatToParts()) {
+    if (currency === 'USD') {
+      return '$';
+    }
+    return '';
+  }
   const parts = new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
