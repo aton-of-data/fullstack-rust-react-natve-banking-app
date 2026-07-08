@@ -30,17 +30,14 @@ Mobile hardening for transfer idempotency, 401 logout, SSE reconnect, UI/testIDs
 
 ## Tooling Verification
 
-| Command                                           | Exit Code | Summary                                   |
-| ------------------------------------------------- | --------- | ----------------------------------------- |
-| `pnpm --filter @ficus/mobile lint`                | 0         | ESLint + JSDoc                            |
-| `pnpm --filter @ficus/mobile typecheck`           | 0         | After removing invalid `tabBarTestID`     |
-| `pnpm --filter @ficus/mobile test`                | 0         | 22 files / 79 tests                       |
-| `pnpm --filter @ficus/money test`                 | 0         | 4 tests                                   |
-| `maestro test …/docs-capture.yaml --platform ios` | 0         | Curated screenshots 01–06                 |
-| `pnpm mobile:e2e:ios` (pre-fix suite)             | 1         | 05–06 PASS; 01–04 FAIL until reset helper |
-| Flows 01–04 after `reset-to-login`                | PASS*     | Rerun progressive: 01–02 PASS observed    |
-
-\*Full six-flow sequential suite should be re-confirmed after wrap-up; unit gates and critical transfer E2E are green.
+| Command                                           | Exit Code | Summary                               |
+| ------------------------------------------------- | --------- | ------------------------------------- |
+| `pnpm --filter @ficus/mobile lint`                | 0         | ESLint + JSDoc                        |
+| `pnpm --filter @ficus/mobile typecheck`           | 0         | After removing invalid `tabBarTestID` |
+| `pnpm --filter @ficus/mobile test`                | 0         | 22 files / 79 tests                   |
+| `pnpm --filter @ficus/money test`                 | 0         | 4 tests                               |
+| `maestro test …/docs-capture.yaml --platform ios` | 0         | Curated screenshots 01–06             |
+| `pnpm mobile:e2e:ios` (reset-helper suite)        | 0         | **6/6 flows passed** (2026-07-08)     |
 
 ## Documentation Verification
 
