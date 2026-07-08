@@ -48,6 +48,8 @@ const variantStyles: Record<ButtonVariant, { bg: string; text: string; border?: 
  * @param props.disabled - Disables interaction.
  * @param props.style - Additional styles.
  * @param props.accessibilityLabel - Accessibility label override.
+ * @param props.accessibilityHint - Accessibility hint for screen readers.
+ * @param props.testID - Stable test identifier for E2E.
  * @returns Styled button element.
  */
 export function Button({
@@ -57,6 +59,8 @@ export function Button({
   disabled,
   style,
   accessibilityLabel,
+  accessibilityHint,
+  testID,
   ...rest
 }: ButtonProps) {
   const v = variantStyles[variant];
@@ -67,8 +71,10 @@ export function Button({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
+      testID={testID}
       style={({ pressed }): StyleProp<ViewStyle> => [
         baseStyle,
         {

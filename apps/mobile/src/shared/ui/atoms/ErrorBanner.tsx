@@ -11,6 +11,8 @@ export interface ErrorBannerProps {
   message: string;
   /** Called when the user dismisses the banner. */
   onDismiss?: () => void;
+  /** Stable test identifier for E2E. */
+  testID?: string;
 }
 
 /**
@@ -19,11 +21,12 @@ export interface ErrorBannerProps {
  * @param props - Banner props.
  * @param props.message - Error message to display.
  * @param props.onDismiss - Dismiss handler.
+ * @param props.testID - Optional test identifier.
  * @returns Error banner view.
  */
-export function ErrorBanner({ message, onDismiss }: ErrorBannerProps) {
+export function ErrorBanner({ message, onDismiss, testID }: ErrorBannerProps) {
   return (
-    <View style={styles.container} accessibilityRole="alert">
+    <View style={styles.container} accessibilityRole="alert" testID={testID}>
       <AppText variant="body" error style={styles.message}>
         {message}
       </AppText>

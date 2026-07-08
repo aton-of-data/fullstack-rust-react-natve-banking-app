@@ -143,6 +143,16 @@ export const transferFormSlice = createSlice({
     },
 
     /**
+     * Clears the in-flight submitting flag without resetting the wizard.
+     *
+     * @param state Current form state.
+     */
+    submitSettled(state) {
+      state.submitting = false;
+      state.submitError = null;
+    },
+
+    /**
      * Resets the form after successful transfer.
      *
      * @returns Initial form state.
@@ -173,6 +183,7 @@ export const {
   backToSearch,
   submitStarted,
   submitFailed,
+  submitSettled,
   submitSucceeded,
   resetForm,
 } = transferFormSlice.actions;

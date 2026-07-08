@@ -30,7 +30,12 @@ export function FeedItemCard({ item, currentUsername }: FeedItemCardProps) {
   const counterparty = isSender ? item.recipient_username : item.sender_username;
 
   return (
-    <Card elevated={false} style={styles.card}>
+    <Card
+      elevated={false}
+      style={styles.card}
+      accessibilityLabel={`${amount} ${direction} ${isSender ? 'to' : 'from'} ${counterparty}`}
+      testID={`feed-item-${item.transfer_id}`}
+    >
       <View style={styles.row}>
         <AppText variant="subtitle">{amount}</AppText>
         <AppText variant="caption" muted>

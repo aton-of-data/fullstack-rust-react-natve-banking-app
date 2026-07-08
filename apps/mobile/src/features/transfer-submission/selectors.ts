@@ -51,3 +51,43 @@ export function selectSubmissionErrorMessage(state: TransferSubmissionState): st
 export function selectSubmissionErrorCode(state: TransferSubmissionState): string | null {
   return state.errorCode;
 }
+
+/**
+ * Selects the last successful transfer id.
+ *
+ * @param state Transfer submission slice state.
+ * @returns Transfer id or null.
+ */
+export function selectLastTransferId(state: TransferSubmissionState): string | null {
+  return state.lastTransferId;
+}
+
+/**
+ * Selects whether an active attempt locks form edits.
+ *
+ * @param state Transfer submission slice state.
+ * @returns True when an idempotency key is held.
+ */
+export function selectHasActiveAttempt(state: TransferSubmissionState): boolean {
+  return state.idempotencyKey !== null;
+}
+
+/**
+ * Selects locked amount input for the active attempt.
+ *
+ * @param state Transfer submission slice state.
+ * @returns Locked amount or null.
+ */
+export function selectLockedAmountInput(state: TransferSubmissionState): string | null {
+  return state.lockedAmountInput;
+}
+
+/**
+ * Selects locked description for the active attempt.
+ *
+ * @param state Transfer submission slice state.
+ * @returns Locked description or null.
+ */
+export function selectLockedDescription(state: TransferSubmissionState): string | null {
+  return state.lockedDescription;
+}

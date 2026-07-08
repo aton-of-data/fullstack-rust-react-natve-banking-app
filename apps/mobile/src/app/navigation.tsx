@@ -42,8 +42,19 @@ function MainTabs() {
         tabBarStyle: { borderTopColor: colors.border },
       }}
     >
-      <Tab.Screen name="Home" component={HomePage} options={{ title: 'Home' }} />
-      <Tab.Screen name="Transfer" component={TransferPage} options={{ title: 'Send' }} />
+      <Tab.Screen
+        name="Home"
+        component={HomePage}
+        options={{ title: 'Home', tabBarAccessibilityLabel: 'Home tab' }}
+      />
+      <Tab.Screen
+        name="Transfer"
+        component={TransferPage}
+        options={{
+          title: 'Send',
+          tabBarAccessibilityLabel: 'Send tab',
+        }}
+      />
     </Tab.Navigator>
   );
 }

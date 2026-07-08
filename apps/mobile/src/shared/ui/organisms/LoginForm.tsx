@@ -39,15 +39,15 @@ export function LoginForm() {
     error && 'status' in error ? 'Invalid username or password. Please try again.' : null;
 
   return (
-    <View style={styles.container}>
-      <AppText variant="title" style={styles.title}>
+    <View style={styles.container} testID="login-screen">
+      <AppText variant="title" style={styles.title} testID="login-title">
         Welcome to Ficus
       </AppText>
       <AppText variant="body" muted style={styles.subtitle}>
         Sign in to send and receive money
       </AppText>
 
-      {errorMessage ? <ErrorBanner message={errorMessage} /> : null}
+      {errorMessage ? <ErrorBanner message={errorMessage} testID="login-error" /> : null}
 
       <FormField
         label="Username"
@@ -57,6 +57,7 @@ export function LoginForm() {
         autoCorrect={false}
         accessibilityLabel="Username"
         textContentType="username"
+        testID="login-username"
       />
 
       <FormField
@@ -66,13 +67,16 @@ export function LoginForm() {
         secureTextEntry
         accessibilityLabel="Password"
         textContentType="password"
+        testID="login-password"
       />
 
       <Button
         label="Sign In"
+        testID="login-submit"
         onPress={() => void handleSubmit()}
         loading={isLoading}
-        disabled={!username || !password}
+        disabled={!username || !password || isLoading}
+        accessibilityLabel="Sign In"
         style={styles.button}
       />
     </View>

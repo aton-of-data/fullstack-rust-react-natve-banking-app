@@ -29,7 +29,7 @@ export function BalanceDisplay({ balanceMinor, currency, username }: BalanceDisp
   const formatted = formatMoney(balanceMinor, currency);
 
   return (
-    <Card style={styles.card}>
+    <Card style={styles.card} testID="home-balance">
       <AppText variant="label" style={styles.label}>
         Available Balance
       </AppText>
@@ -38,7 +38,12 @@ export function BalanceDisplay({ balanceMinor, currency, username }: BalanceDisp
           @{username}
         </AppText>
       ) : null}
-      <AppText variant="title" style={styles.amount}>
+      <AppText
+        variant="title"
+        style={styles.amount}
+        accessibilityLabel={`Available balance ${formatted}`}
+        testID="home-balance-amount"
+      >
         {formatted}
       </AppText>
       <View style={styles.accent} accessibilityElementsHidden />

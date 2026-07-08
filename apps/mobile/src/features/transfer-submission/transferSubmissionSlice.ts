@@ -22,6 +22,10 @@ export interface TransferSubmissionState {
   errorCode: string | null;
   /** User-facing error message. */
   errorMessage: string | null;
+  /** Snapshot of amount input locked with the idempotency key. */
+  lockedAmountInput: string | null;
+  /** Snapshot of description locked with the idempotency key. */
+  lockedDescription: string | null;
 }
 
 const initialState: TransferSubmissionState = {
@@ -31,6 +35,8 @@ const initialState: TransferSubmissionState = {
   retryable: false,
   errorCode: null,
   errorMessage: null,
+  lockedAmountInput: null,
+  lockedDescription: null,
 };
 
 /**
@@ -46,6 +52,16 @@ export function generateIdempotencyKey(): string {
 }
 
 /**
+ * Payload for beginning a transfer attempt with form snapshot.
+ */
+export interface BeginTransferAttemptPayload {
+  /** Amount input (major-unit decimal string) locked to this key. */
+  amountInput: string;
+  /** Optional description locked to this key. */
+  description: string;
+}
+
+/**
  * Redux slice managing transfer submission idempotency lifecycle.
  */
 export const transferSubmissionSlice = createSlice({
@@ -53,18 +69,24 @@ export const transferSubmissionSlice = createSlice({
   initialState,
   reducers: {
     /**
-     * Begins a new transfer attempt by generating a fresh idempotency key.
+     * Begins a new transfer attempt only when no key is active.
+     * Preserves an existing key (and locked payload) so Back→Review cannot rotate keys after unknown outcomes.
      *
      * @param state Current submission state.
-     * @returns Updated submission state.
+     * @param action Amount and description snapshot for the attempt.
      */
-    beginTransferAttempt(state) {
+    beginTransferAttempt(state, action: PayloadAction<BeginTransferAttemptPayload>) {
+      if (state.idempotencyKey) {
+        return;
+      }
       state.idempotencyKey = generateIdempotencyKey();
       state.status = 'idle';
       state.lastTransferId = null;
       state.retryable = false;
       state.errorCode = null;
       state.errorMessage = null;
+      state.lockedAmountInput = action.payload.amountInput;
+      state.lockedDescription = action.payload.description;
     },
 
     /**
@@ -109,7 +131,16 @@ export const transferSubmissionSlice = createSlice({
     },
 
     /**
-     * Clears submission state after completion or explicit reset.
+     * Cleared acknowledgement after success UI is shown — keeps lastTransferId until reset.
+     *
+     * @param state Current submission state.
+     */
+    acknowledgeSuccess(state) {
+      state.status = 'succeeded';
+    },
+
+    /**
+     * Clears submission state after completion or explicit cancel / new transfer.
      *
      * @returns Initial submission state.
      */
@@ -125,6 +156,7 @@ export const {
   submissionStarted,
   submissionSucceeded,
   submissionFailed,
+  acknowledgeSuccess,
   resetSubmission,
 } = transferSubmissionSlice.actions;
 

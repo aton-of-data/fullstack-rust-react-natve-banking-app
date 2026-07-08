@@ -12,5 +12,6 @@ export {
   selectIsAuthenticated,
   selectAccessToken,
   selectUsername,
+  selectUserId,
   selectAuthHydrated,
 } from './selectors';

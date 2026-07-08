@@ -41,6 +41,16 @@ export function selectUsername(state: RootState): string | null {
 }
 
 /**
+ * Selects the authenticated user id.
+ *
+ * @param state Root Redux state.
+ * @returns User id or null.
+ */
+export function selectUserId(state: RootState): string | null {
+  return state.auth.userId;
+}
+
+/**
  * Selects whether SecureStore rehydration has completed.
  *
  * @param state Root Redux state.

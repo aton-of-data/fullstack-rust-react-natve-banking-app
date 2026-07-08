@@ -55,6 +55,7 @@ export function FeedList() {
           renderItem={({ item }) => <FeedItemCard item={item} currentUsername={username} />}
           scrollEnabled={false}
           accessibilityLabel="Transaction feed"
+          testID="feed-list"
         />
       )}
     </View>

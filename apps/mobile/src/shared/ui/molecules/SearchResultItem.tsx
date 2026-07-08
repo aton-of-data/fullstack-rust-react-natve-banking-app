@@ -28,6 +28,7 @@ export function SearchResultItem({ user, onSelect }: SearchResultItemProps) {
       onPress={() => onSelect(user)}
       accessibilityRole="button"
       accessibilityLabel={`Select recipient ${user.username}`}
+      testID={`recipient-${user.username}`}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
       <AppText variant="body">@{user.username}</AppText>

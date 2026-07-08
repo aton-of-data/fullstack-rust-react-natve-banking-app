@@ -34,6 +34,7 @@ export function formatMoney(minor: string, currency: string, locale?: string): s
 
 /**
  * Validates that an amount input is a positive major-unit decimal.
+ * Uses integer minor-unit comparison — never floating-point arithmetic.
  *
  * @param input Amount input string.
  * @returns True when valid and greater than zero.
@@ -46,6 +47,10 @@ export function isValidAmountInput(input: string): boolean {
   if (!/^\d+(\.\d{0,2})?$/.test(trimmed)) {
     return false;
   }
-  const value = Number(trimmed);
-  return value > 0;
+  try {
+    const minor = majorToMinorUnits(trimmed);
+    return BigInt(minor) > 0n;
+  } catch {
+    return false;
+  }
 }
