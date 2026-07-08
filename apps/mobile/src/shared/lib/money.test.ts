@@ -31,7 +31,11 @@ describe('isValidAmountInput', () => {
     expect(isValidAmountInput('0')).toBe(false);
   });
 
-  it('rejects invalid strings', () => {
-    expect(isValidAmountInput('abc')).toBe(false);
+  it('rejects more than two decimal places', () => {
+    expect(isValidAmountInput('1.234')).toBe(false);
+  });
+
+  it('rejects negative-looking input', () => {
+    expect(isValidAmountInput('-1')).toBe(false);
   });
 });

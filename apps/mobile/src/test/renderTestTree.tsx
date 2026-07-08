@@ -1,24 +1,22 @@
-import type { PreloadedState } from '@reduxjs/toolkit';
 import type { ReactElement } from 'react';
 import renderer, { type ReactTestInstance } from 'react-test-renderer';
 import { Provider } from 'react-redux';
 
-import { createTestStore, type createTestStore as CreateTestStoreFn } from './renderWithProviders';
-import type { RootState } from '@/store';
-import { Provider } from 'react-redux';
+import { createTestStore } from './renderWithProviders';
 
-type TestStore = ReturnType<typeof CreateTestStoreFn>;
+type TestStore = ReturnType<typeof createTestStore>;
 
 /**
  * Renders a component with Redux provider using react-test-renderer.
  *
  * @param ui React element to render.
- * @param options Optional preloaded Redux state.
+ * @param options Optional render options.
+ * @param options.preloadedState Optional partial Redux initial state.
  * @returns Renderer tree and store.
  */
 export function renderTestTree(
   ui: ReactElement,
-  options?: { preloadedState?: PreloadedState<RootState> },
+  options?: { preloadedState?: Record<string, unknown> },
 ): { store: TestStore; root: ReactTestInstance } {
   const store = createTestStore(options?.preloadedState);
   const tree = renderer.create(<Provider store={store}>{ui}</Provider>);
@@ -34,7 +32,8 @@ export function renderTestTree(
  */
 export function findByText(root: ReactTestInstance, text: string): ReactTestInstance {
   const matches = root.findAll(
-    (node) => typeof node.children[0] === 'string' && node.children.join('').includes(text),
+    (node: ReactTestInstance) =>
+      typeof node.children[0] === 'string' && node.children.join('').includes(text),
   );
   if (matches.length === 0) {
     throw new Error(`Text not found: ${text}`);

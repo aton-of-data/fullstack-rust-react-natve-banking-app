@@ -17,7 +17,10 @@ import {
 
 describe('transfer submission selectors', () => {
   it('exposes idempotency and lifecycle fields', () => {
-    let state = transferSubmissionReducer(undefined, beginTransferAttempt());
+    let state = transferSubmissionReducer(
+      undefined,
+      beginTransferAttempt({ amountInput: '1.00', description: '' }),
+    );
     expect(selectIdempotencyKey(state)).toBeTruthy();
     const key = selectIdempotencyKey(state);
 

@@ -15,6 +15,8 @@ import {
   transferFormReducer,
 } from '@/features/transfer-form';
 
+const attempt = { amountInput: '10.00', description: '' };
+
 describe('transfer confirmation workflow state', () => {
   it('generates key on confirm step and preserves it on retry', () => {
     let form = transferFormReducer(undefined, selectRecipient({ userId: 'u1', username: 'bob' }));
@@ -22,7 +24,7 @@ describe('transfer confirmation workflow state', () => {
     form = transferFormReducer(form, goToConfirm());
     expect(form.step).toBe('confirm');
 
-    let submission = transferSubmissionReducer(undefined, beginTransferAttempt());
+    let submission = transferSubmissionReducer(undefined, beginTransferAttempt(attempt));
     const key = submission.idempotencyKey;
     submission = transferSubmissionReducer(submission, submissionStarted());
     submission = transferSubmissionReducer(
@@ -38,11 +40,30 @@ describe('transfer confirmation workflow state', () => {
   });
 
   it('issues new key after successful completion and reset', () => {
-    let submission = transferSubmissionReducer(undefined, beginTransferAttempt());
+    let submission = transferSubmissionReducer(undefined, beginTransferAttempt(attempt));
     const first = submission.idempotencyKey;
     submission = transferSubmissionReducer(submission, submissionSucceeded('transfer-99'));
     submission = transferSubmissionReducer(submission, resetSubmission());
-    submission = transferSubmissionReducer(submission, beginTransferAttempt());
+    submission = transferSubmissionReducer(submission, beginTransferAttempt(attempt));
     expect(submission.idempotencyKey).not.toBe(first);
+  });
+
+  it('Back then Review does not rotate key after unknown outcome', () => {
+    let submission = transferSubmissionReducer(undefined, beginTransferAttempt(attempt));
+    const key = submission.idempotencyKey;
+    submission = transferSubmissionReducer(submission, submissionStarted());
+    submission = transferSubmissionReducer(
+      submission,
+      submissionFailed({
+        code: 'NETWORK_ERROR',
+        message: 'timeout',
+        retryable: true,
+      }),
+    );
+    submission = transferSubmissionReducer(
+      submission,
+      beginTransferAttempt({ amountInput: '10.00', description: '' }),
+    );
+    expect(submission.idempotencyKey).toBe(key);
   });
 });

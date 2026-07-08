@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { authReducer, setCredentials } from '@/features/auth';
+import { transferFormReducer } from '@/features/transfer-form';
 import { transferSubmissionReducer } from '@/features/transfer-submission';
 import { baseApi, ficusApi } from './baseApi';
 import { subscribeFeedSse } from './sse';
@@ -11,12 +12,14 @@ const subscribeFeedSseMock = vi.mocked(subscribeFeedSse);
 vi.mock('./sse', () => ({
   subscribeFeedSse: vi.fn().mockResolvedValue(undefined),
   parseSseChunk: vi.fn(() => []),
+  parseSseBuffer: vi.fn(() => ({ items: [], remainder: '', lastEventId: null })),
 }));
 
 function createTestStore() {
   return configureStore({
     reducer: {
       auth: authReducer,
+      transferForm: transferFormReducer,
       transferSubmission: transferSubmissionReducer,
       [baseApi.reducerPath]: baseApi.reducer,
     },
@@ -106,6 +109,7 @@ describe('createTransfer mutation', () => {
   const fetchMock = vi.fn();
 
   beforeEach(() => {
+    fetchMock.mockReset();
     vi.stubGlobal('fetch', fetchMock);
     fetchMock.mockResolvedValue(
       mockFetchResponse({
@@ -153,5 +157,57 @@ describe('createTransfer mutation', () => {
       '550e8400-e29b-41d4-a716-446655440000',
     );
     expect(headers.Authorization ?? headers.authorization).toBe('Bearer token-abc');
+  });
+
+  it('retries reuse the same Idempotency-Key on successive mutations', async () => {
+    const store = createTestStore();
+    store.dispatch(setCredentials({ accessToken: 'token-abc', userId: 'u1', username: 'alice' }));
+    const key = '550e8400-e29b-41d4-a716-446655440099';
+    const body = {
+      recipient_username: 'bob',
+      amount_minor: '100',
+      currency: 'USD',
+    };
+
+    await store.dispatch(ficusApi.endpoints.createTransfer.initiate({ body, idempotencyKey: key }));
+    await store.dispatch(ficusApi.endpoints.createTransfer.initiate({ body, idempotencyKey: key }));
+
+    const transferCalls = fetchMock.mock.calls.filter((call) => {
+      const request = call[0] as Request | string;
+      return requestUrl(request).includes('/v1/transfers');
+    });
+    expect(transferCalls.length).toBeGreaterThanOrEqual(2);
+    for (const call of transferCalls) {
+      const request = call[0] as Request | string;
+      const init = typeof request === 'string' ? (call[1] as RequestInit) : undefined;
+      const headers =
+        init?.headers instanceof Headers
+          ? Object.fromEntries(init.headers.entries())
+          : ((init?.headers as Record<string, string> | undefined) ??
+            Object.fromEntries((request as Request).headers.entries()));
+      expect(headers['Idempotency-Key'] ?? headers['idempotency-key']).toBe(key);
+    }
+  });
+
+  it('clears credentials on unauthorized transfer response', async () => {
+    fetchMock.mockResolvedValue(
+      mockFetchResponse({ code: 'UNAUTHORIZED', message: 'expired' }, 401),
+    );
+    const store = createTestStore();
+    store.dispatch(setCredentials({ accessToken: 'token-abc', userId: 'u1', username: 'alice' }));
+
+    await store.dispatch(
+      ficusApi.endpoints.createTransfer.initiate({
+        body: {
+          recipient_username: 'bob',
+          amount_minor: '100',
+          currency: 'USD',
+        },
+        idempotencyKey: '550e8400-e29b-41d4-a716-446655440010',
+      }),
+    );
+
+    expect(store.getState().auth.status).toBe('unauthenticated');
+    expect(store.getState().auth.accessToken).toBeNull();
   });
 });

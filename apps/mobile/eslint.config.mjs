@@ -8,9 +8,12 @@ export default createFicusConfig(
         'node_modules/**',
         '.expo/**',
         'dist/**',
+        'coverage/**',
+        'e2e/**',
         'metro.config.js',
         'babel.config.js',
         'eslint.config.mjs',
+        'vitest.setup.ts',
       ],
     },
     {

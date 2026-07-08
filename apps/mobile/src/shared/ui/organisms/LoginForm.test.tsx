@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { LoginForm } from './LoginForm';
-import { findByLabel, findByText, renderTestTree } from '@/test/renderTestTree';
+import { findByLabel, renderTestTree } from '@/test/renderTestTree';
 
 const loginMock = vi.fn();
 
