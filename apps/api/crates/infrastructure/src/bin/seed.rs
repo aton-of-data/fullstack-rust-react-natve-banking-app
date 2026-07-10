@@ -73,8 +73,12 @@ async fn seed(db: &DatabaseConnection) -> Result<(), Box<dyn std::error::Error>>
             .filter(users::Column::Username.eq(user.username))
             .one(&txn)
             .await?;
-        if existing.is_some() {
-            println!("user {} already exists, skipping", user.username);
+        if let Some(existing_user) = existing {
+            if should_reset_balances() {
+                restore_seed_balance(&txn, system_id, &existing_user, user).await?;
+            } else {
+                println!("user {} already exists, skipping", user.username);
+            }
             continue;
         }
 
@@ -130,6 +134,59 @@ async fn seed(db: &DatabaseConnection) -> Result<(), Box<dyn std::error::Error>>
     }
 
     txn.commit().await?;
+    Ok(())
+}
+
+fn should_reset_balances() -> bool {
+    std::env::var("SEED_RESET_BALANCES")
+        .ok()
+        .is_some_and(|value| matches!(value.as_str(), "1" | "true" | "TRUE" | "yes" | "YES"))
+}
+
+async fn restore_seed_balance(
+    txn: &sea_orm::DatabaseTransaction,
+    system_id: Uuid,
+    existing_user: &users::Model,
+    user: &SeedUser,
+) -> Result<(), sea_orm::DbErr> {
+    let account = accounts::Entity::find()
+        .filter(accounts::Column::UserId.eq(existing_user.id))
+        .one(txn)
+        .await?
+        .ok_or_else(|| sea_orm::DbErr::Custom(format!("account missing for {}", user.username)))?;
+
+    let balance = account_balances::Entity::find_by_id(account.id)
+        .one(txn)
+        .await?
+        .ok_or_else(|| {
+            sea_orm::DbErr::Custom(format!("balance missing for {}", user.username))
+        })?;
+
+    let top_up = user.balance_minor - balance.balance_minor;
+    if top_up <= 0 {
+        println!(
+            "user {} balance {} already at or above seed target {}",
+            user.username, balance.balance_minor, user.balance_minor
+        );
+        return Ok(());
+    }
+
+    fund_from_system(
+        txn,
+        system_id,
+        account.id,
+        existing_user.id,
+        existing_user.id,
+        user.username,
+        user.username,
+        top_up,
+    )
+    .await?;
+
+    println!(
+        "restored user {} to seed balance {} (topped up {} minor units)",
+        user.username, user.balance_minor, top_up
+    );
     Ok(())
 }
 

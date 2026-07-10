@@ -1,14 +1,19 @@
 /**
  * k6 load test: login → transfer → poll feed.
  *
+ * Authenticates seeded users once in `setup()` so iterations exercise transfer,
+ * balance, and feed paths without tripping login rate limits (default 10/min/IP).
+ *
  * Environment (set by run-k6.mjs):
  *   API_BASE_URL — default http://localhost:8080
  */
 
 import http from 'k6/http';
 import { check, sleep } from 'k6';
-import { randomIntBetween } from 'k6/utils';
-import { uuidv4 } from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
+import {
+  randomIntBetween,
+  uuidv4,
+} from 'https://jslib.k6.io/k6-utils/1.4.0/index.js';
 
 const BASE_URL = __ENV.API_BASE_URL || 'http://localhost:8080';
 
@@ -28,15 +33,19 @@ export const options = {
 
 /**
  * Picks a sender/recipient pair that are different users.
- * @returns {{ sender: object, recipient: object }}
+ * @param {Array<{ user: object, token: string }>} sessions
+ * @returns {{ sender: { user: object, token: string }, recipient: object }}
  */
-function pickTransferPair() {
-  const senderIdx = randomIntBetween(0, USERS.length - 1);
-  let recipientIdx = randomIntBetween(0, USERS.length - 1);
+function pickTransferPair(sessions) {
+  const senderIdx = randomIntBetween(0, sessions.length - 1);
+  let recipientIdx = randomIntBetween(0, sessions.length - 1);
   while (recipientIdx === senderIdx) {
-    recipientIdx = randomIntBetween(0, USERS.length - 1);
+    recipientIdx = randomIntBetween(0, sessions.length - 1);
   }
-  return { sender: USERS[senderIdx], recipient: USERS[recipientIdx] };
+  return {
+    sender: sessions[senderIdx],
+    recipient: sessions[recipientIdx].user,
+  };
 }
 
 /**
@@ -72,13 +81,10 @@ function login(user) {
   return JSON.parse(res.body).access_token;
 }
 
-export default function () {
-  const { sender, recipient } = pickTransferPair();
-  const token = login(sender);
-  if (!token) {
-    sleep(1);
-    return;
-  }
+export default function (data) {
+  const { sessions } = data;
+  const { sender, recipient } = pickTransferPair(sessions);
+  const token = sender.token;
 
   const authHeaders = {
     Authorization: `Bearer ${token}`,
@@ -134,5 +140,14 @@ export default function () {
 export function setup() {
   const res = http.get(`${BASE_URL}/health/ready`);
   check(res, { 'API ready': (r) => r.status === 200 });
-  return {};
+
+  const sessions = USERS.map((user) => {
+    const token = login(user);
+    if (!token) {
+      throw new Error(`setup login failed for ${user.username}`);
+    }
+    return { user, token };
+  });
+
+  return { sessions };
 }
